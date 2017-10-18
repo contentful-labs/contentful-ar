@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.0"
+    compileSdkVersion 26
+    buildToolsVersion '26.0.2'
 
     defaultConfig {
         applicationId "com.google.ar.core.examples.java.helloar"
         minSdkVersion 24
-        targetSdkVersion 25
+        targetSdkVersion 26
         versionCode 1
         versionName "1.0"
     }
@@ -25,13 +25,14 @@ android {
 
 repositories {
     flatDir {
-        dirs './libs', '../../../libraries'
+        dirs '../../../libraries'
     }
+    google()
 }
 
 dependencies {
     compile (name: 'arcore_client', ext: 'aar')
-    compile (name: 'obj-0.2.1', ext: 'jar')
-    compile 'com.android.support:appcompat-v7:25.0.0'
-    compile 'com.android.support:design:25.0.0'
+    compile 'com.android.support:appcompat-v7:26.1.0'
+    compile 'com.android.support:design:26.1.0'
+    compile 'de.javagl:obj:0.2.1'
 }
