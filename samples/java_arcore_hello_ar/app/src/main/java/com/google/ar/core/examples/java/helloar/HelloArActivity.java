@@ -29,6 +29,8 @@ import com.google.ar.core.examples.java.helloar.rendering.ObjectRenderer.BlendMo
 import com.google.ar.core.examples.java.helloar.rendering.PlaneAttachment;
 import com.google.ar.core.examples.java.helloar.rendering.PlaneRenderer;
 import com.google.ar.core.examples.java.helloar.rendering.PointCloudRenderer;
+import com.google.ar.core.exceptions.CameraException;
+import com.google.ar.core.exceptions.NotTrackingException;
 
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
@@ -227,31 +229,8 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
             // camera framerate.
             Frame frame = mSession.update();
 
-            // Handle taps. Handling only one tap per frame, as taps are usually low frequency
-            // compared to frame rate.
-            MotionEvent tap = mQueuedSingleTaps.poll();
-            if (tap != null && frame.getTrackingState() == TrackingState.TRACKING) {
-                for (HitResult hit : frame.hitTest(tap)) {
-                    // Check if any plane was hit, and if it was hit inside the plane polygon.
-                    if (hit instanceof PlaneHitResult && ((PlaneHitResult) hit).isHitInPolygon()) {
-                        // Cap the number of objects created. This avoids overloading both the
-                        // rendering system and ARCore.
-                        if (mTouches.size() >= 16) {
-                            mSession.removeAnchors(Arrays.asList(mTouches.get(0).getAnchor()));
-                            mTouches.remove(0);
-                        }
-                        // Adding an Anchor tells ARCore that it should track this position in
-                        // space. This anchor will be used in PlaneAttachment to place the 3d model
-                        // in the correct position relative both to the world and to the plane.
-                        mTouches.add(new PlaneAttachment(
-                            ((PlaneHitResult) hit).getPlane(),
-                            mSession.addAnchor(hit.getHitPose())));
+            handleTap(frame);
 
-                        // Hits are sorted by depth. Consider only closest hit on a plane.
-                        break;
-                    }
-                }
-            }
 
             // Draw background.
             mCameraFeedRenderer.draw(frame);
@@ -311,6 +290,34 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
         } catch (Throwable t) {
             // Avoid crashing the application due to unhandled exceptions.
             Log.e(TAG, "Exception on the OpenGL thread", t);
+        }
+    }
+
+    private void handleTap(Frame frame) throws CameraException, NotTrackingException {
+        // Handle taps. Handling only one tap per frame, as taps are usually low frequency
+        // compared to frame rate.
+        MotionEvent tap = mQueuedSingleTaps.poll();
+        if (tap != null && frame.getTrackingState() == TrackingState.TRACKING) {
+            for (HitResult hit : frame.hitTest(tap)) {
+                // Check if any plane was hit, and if it was hit inside the plane polygon.
+                if (hit instanceof PlaneHitResult && ((PlaneHitResult) hit).isHitInPolygon()) {
+                    // Cap the number of objects created. This avoids overloading both the
+                    // rendering system and ARCore.
+                    if (mTouches.size() >= 16) {
+                        mSession.removeAnchors(Arrays.asList(mTouches.get(0).getAnchor()));
+                        mTouches.remove(0);
+                    }
+                    // Adding an Anchor tells ARCore that it should track this position in
+                    // space. This anchor will be used in PlaneAttachment to place the 3d model
+                    // in the correct position relative both to the world and to the plane.
+                    mTouches.add(new PlaneAttachment(
+                        ((PlaneHitResult) hit).getPlane(),
+                        mSession.addAnchor(hit.getHitPose())));
+
+                    // Hits are sorted by depth. Consider only closest hit on a plane.
+                    break;
+                }
+            }
         }
     }
 
