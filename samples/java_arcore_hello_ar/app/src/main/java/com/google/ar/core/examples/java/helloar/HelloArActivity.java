@@ -16,6 +16,17 @@
 
 package com.google.ar.core.examples.java.helloar;
 
+import android.opengl.GLES20;
+import android.opengl.GLSurfaceView;
+import android.os.Bundle;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.Toast;
+
 import com.google.ar.core.Config;
 import com.google.ar.core.Frame;
 import com.google.ar.core.Frame.TrackingState;
@@ -31,18 +42,6 @@ import com.google.ar.core.examples.java.helloar.rendering.PlaneRenderer;
 import com.google.ar.core.examples.java.helloar.rendering.PointCloudRenderer;
 import com.google.ar.core.exceptions.CameraException;
 import com.google.ar.core.exceptions.NotTrackingException;
-
-import android.opengl.GLES20;
-import android.opengl.GLSurfaceView;
-import android.os.Bundle;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.WindowManager;
-import android.widget.Toast;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -62,11 +61,20 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
 
     // Rendering. The Renderers are created here, and initialized when the GL surface is created.
     private GLSurfaceView mSurfaceView;
+    private final View.OnTouchListener tapListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
+                // Queue tap if there is space. Tap is lost if queue is full.
+                mQueuedSingleTaps.offer(event);
+            }
+            return true;
+        }
+    };
 
     private Config mDefaultConfig;
     private Session mSession;
     private CameraFeedRenderer mCameraFeedRenderer = new CameraFeedRenderer();
-    private GestureDetector mGestureDetector;
     private Snackbar mLoadingMessageSnackbar = null;
 
     private ObjectRenderer mVirtualObject = new ObjectRenderer();
@@ -98,25 +106,7 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
         }
 
         // Set up tap listener.
-        mGestureDetector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
-            @Override
-            public boolean onSingleTapUp(MotionEvent e) {
-                onSingleTap(e);
-                return true;
-            }
-
-            @Override
-            public boolean onDown(MotionEvent e) {
-                return true;
-            }
-        });
-
-        mSurfaceView.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                return mGestureDetector.onTouchEvent(event);
-            }
-        });
+        mSurfaceView.setOnTouchListener(tapListener);
 
         // Set up renderer.
         mSurfaceView.setPreserveEGLContextOnPause(true);
@@ -175,11 +165,6 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
                     | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         }
-    }
-
-    private void onSingleTap(MotionEvent e) {
-        // Queue tap if there is space. Tap is lost if queue is full.
-        mQueuedSingleTaps.offer(e);
     }
 
     @Override
