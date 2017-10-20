@@ -33,8 +33,8 @@ import javax.microedition.khronos.opengles.GL10;
  * This class renders the AR background from camera feed. It creates and hosts the texture
  * given to ARCore to be filled with the camera image.
  */
-public class BackgroundRenderer {
-    private static final String TAG = BackgroundRenderer.class.getSimpleName();
+public class CameraFeedRenderer {
+    private static final String TAG = CameraFeedRenderer.class.getSimpleName();
 
     private static final int COORDS_PER_VERTEX = 3;
     private static final int TEXCOORDS_PER_VERTEX = 2;
@@ -50,7 +50,7 @@ public class BackgroundRenderer {
     private int mQuadTexCoordParam;
     private int mTextureId = -1;
     private int mTextureTarget = GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
-    public BackgroundRenderer() {
+    public CameraFeedRenderer() {
     }
 
     public int getTextureId() {

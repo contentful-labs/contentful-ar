@@ -23,7 +23,7 @@ import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
 import com.google.ar.core.PlaneHitResult;
 import com.google.ar.core.Session;
-import com.google.ar.core.examples.java.helloar.rendering.BackgroundRenderer;
+import com.google.ar.core.examples.java.helloar.rendering.CameraFeedRenderer;
 import com.google.ar.core.examples.java.helloar.rendering.ObjectRenderer;
 import com.google.ar.core.examples.java.helloar.rendering.ObjectRenderer.BlendMode;
 import com.google.ar.core.examples.java.helloar.rendering.PlaneAttachment;
@@ -63,7 +63,7 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
 
     private Config mDefaultConfig;
     private Session mSession;
-    private BackgroundRenderer mBackgroundRenderer = new BackgroundRenderer();
+    private CameraFeedRenderer mCameraFeedRenderer = new CameraFeedRenderer();
     private GestureDetector mGestureDetector;
     private Snackbar mLoadingMessageSnackbar = null;
 
@@ -185,8 +185,8 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
         GLES20.glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
         // Create the texture and pass it to ARCore session to be filled during update().
-        mBackgroundRenderer.createOnGlThread(/*context=*/this);
-        mSession.setCameraTextureName(mBackgroundRenderer.getTextureId());
+        mCameraFeedRenderer.createOnGlThread(/*context=*/this);
+        mSession.setCameraTextureName(mCameraFeedRenderer.getTextureId());
 
         // Prepare the other rendering objects.
         try {
@@ -254,7 +254,7 @@ public class HelloArActivity extends AppCompatActivity implements GLSurfaceView.
             }
 
             // Draw background.
-            mBackgroundRenderer.draw(frame);
+            mCameraFeedRenderer.draw(frame);
 
             // If not tracking, don't draw 3d objects.
             if (frame.getTrackingState() == TrackingState.NOT_TRACKING) {
