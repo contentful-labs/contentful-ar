@@ -43,7 +43,6 @@ public class ObjectRenderer {
   private static final String TAG = ObjectRenderer.class.getSimpleName();
   private static final int COORDS_PER_VERTEX = 3;
 
-  ;
   // Note: the last component must be zero to avoid applying the translational part of the matrix.
   private static final float[] LIGHT_DIRECTION = new float[]{0.0f, 1.0f, 0.0f, 0.0f};
   private float[] mViewLightDirection = new float[4];
@@ -79,8 +78,7 @@ public class ObjectRenderer {
   private float mDiffuse = 1.0f;
   private float mSpecular = 1.0f;
   private float mSpecularPower = 6.0f;
-  public ObjectRenderer() {
-  }
+
 
   public static void normalizeVec3(float[] v) {
     float reciprocalLength = 1.0f / (float) Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);

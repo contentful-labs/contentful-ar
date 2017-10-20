@@ -51,6 +51,7 @@ public class CameraFeedRenderer {
   private static final int COORDS_PER_VERTEX = 3;
   private static final int TEXCOORDS_PER_VERTEX = 2;
   private static final int FLOAT_SIZE = 4;
+  private static final int TEXTURE_TARGET = GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
   private FloatBuffer mQuadVertices;
   private FloatBuffer mQuadTexCoord;
   private FloatBuffer mQuadTexCoordTransformed;
@@ -58,10 +59,6 @@ public class CameraFeedRenderer {
   private int mQuadPositionParam;
   private int mQuadTexCoordParam;
   private int mTextureId = -1;
-  private int mTextureTarget = GLES11Ext.GL_TEXTURE_EXTERNAL_OES;
-
-  public CameraFeedRenderer() {
-  }
 
   public int getTextureId() {
     return mTextureId;
@@ -79,11 +76,11 @@ public class CameraFeedRenderer {
     int textures[] = new int[1];
     GLES20.glGenTextures(1, textures, 0);
     mTextureId = textures[0];
-    GLES20.glBindTexture(mTextureTarget, mTextureId);
-    GLES20.glTexParameteri(mTextureTarget, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
-    GLES20.glTexParameteri(mTextureTarget, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
-    GLES20.glTexParameteri(mTextureTarget, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
-    GLES20.glTexParameteri(mTextureTarget, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_NEAREST);
+    GLES20.glBindTexture(TEXTURE_TARGET, mTextureId);
+    GLES20.glTexParameteri(TEXTURE_TARGET, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_CLAMP_TO_EDGE);
+    GLES20.glTexParameteri(TEXTURE_TARGET, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_CLAMP_TO_EDGE);
+    GLES20.glTexParameteri(TEXTURE_TARGET, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
+    GLES20.glTexParameteri(TEXTURE_TARGET, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_NEAREST);
 
     int numVertices = 4;
     if (numVertices != QUAD_COORDS.length / COORDS_PER_VERTEX) {

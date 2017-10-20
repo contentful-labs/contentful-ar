@@ -116,9 +116,6 @@ public class PlaneRenderer {
   private float[] mPlaneAngleUvMatrix = new float[4]; // 2x2 rotation matrix applied to uv coords.
   private Map<Plane, Integer> mPlaneIndexMap = new HashMap<>();
 
-  public PlaneRenderer() {
-  }
-
   private static void colorRgbaToFloat(float[] planeColor, int colorRgba) {
     planeColor[0] = ((float) ((colorRgba >> 24) & 0xff)) / 255.0f;
     planeColor[1] = ((float) ((colorRgba >> 16) & 0xff)) / 255.0f;

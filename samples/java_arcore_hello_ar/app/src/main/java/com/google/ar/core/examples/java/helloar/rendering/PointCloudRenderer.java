@@ -54,9 +54,6 @@ public class PointCloudRenderer {
   // was not changed.
   private PointCloud mLastPointCloud = null;
 
-  public PointCloudRenderer() {
-  }
-
   /**
    * Allocates and initializes OpenGL resources needed by the plane renderer.  Must be
    * called on the OpenGL thread, typically in

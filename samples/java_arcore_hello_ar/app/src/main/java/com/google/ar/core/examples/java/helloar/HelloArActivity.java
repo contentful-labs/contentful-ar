@@ -46,19 +46,19 @@ public class HelloArActivity extends AppCompatActivity {
   // Rendering. The Renderers are created here, and initialized when the GL surface is created.
   private GLSurfaceView mSurfaceView;
   private Scene scene;
-  private Config mDefaultConfig;
-  private Session mSession;
-  private Snackbar mLoadingMessageSnackbar = null;
+  private Config defaultConfig;
+  private Session session;
+  private Snackbar loadingMessageSnackbar = null;
 
   // Tap handling and UI.
-  private ArrayBlockingQueue<MotionEvent> mQueuedSingleTaps = new ArrayBlockingQueue<>(16);
+  private ArrayBlockingQueue<MotionEvent> queuedTaps = new ArrayBlockingQueue<>(16);
 
   private final View.OnTouchListener tapListener = new View.OnTouchListener() {
     @Override
     public boolean onTouch(View v, MotionEvent event) {
       if (event.getAction() == MotionEvent.ACTION_UP) {
         // Queue tap if there is space. Tap is lost if queue is full.
-        mQueuedSingleTaps.offer(event);
+        queuedTaps.offer(event);
       }
       return true;
     }
@@ -80,12 +80,12 @@ public class HelloArActivity extends AppCompatActivity {
     setContentView(R.layout.activity_main);
     mSurfaceView = findViewById(R.id.surfaceview);
 
-    mSession = new Session(this);
-    scene = new Scene(this, mSurfaceView, mSession, drawCallback);
+    session = new Session(this);
+    scene = new Scene(this, mSurfaceView, session, drawCallback);
 
     // Create default config, check is supported, create session from that config.
-    mDefaultConfig = Config.createDefaultConfig();
-    if (!mSession.isSupported(mDefaultConfig)) {
+    defaultConfig = Config.createDefaultConfig();
+    if (!session.isSupported(defaultConfig)) {
       Toast.makeText(this, "This device does not support AR", Toast.LENGTH_LONG).show();
       finish();
       return;
@@ -104,7 +104,7 @@ public class HelloArActivity extends AppCompatActivity {
     if (CameraPermissionHelper.hasCameraPermission(this)) {
       showLoadingMessage();
       // Note that order matters - see the note in onPause(), the reverse applies here.
-      mSession.resume(mDefaultConfig);
+      session.resume(defaultConfig);
       scene.bind();
     } else {
       CameraPermissionHelper.requestCameraPermission(this);
@@ -116,9 +116,9 @@ public class HelloArActivity extends AppCompatActivity {
     super.onPause();
     // Note that the order matters - GLSurfaceView is paused first so that it does not try
     // to query the session. If Session is paused before GLSurfaceView, GLSurfaceView may
-    // still call mSession.update() and get a SessionPausedException.
+    // still call session.update() and get a SessionPausedException.
     scene.unbind();
-    mSession.pause();
+    session.pause();
   }
 
   @Override
@@ -149,7 +149,7 @@ public class HelloArActivity extends AppCompatActivity {
   private void handleTap(Frame frame) {
     // Handle taps. Handling only one tap per frame, as taps are usually low frequency
     // compared to frame rate.
-    MotionEvent tap = mQueuedSingleTaps.poll();
+    MotionEvent tap = queuedTaps.poll();
     if (tap != null && frame.getTrackingState() == TrackingState.TRACKING) {
       for (HitResult hit : frame.hitTest(tap)) {
         // Check if any plane was hit, and if it was hit inside the plane polygon.
@@ -168,11 +168,11 @@ public class HelloArActivity extends AppCompatActivity {
     runOnUiThread(new Runnable() {
       @Override
       public void run() {
-        mLoadingMessageSnackbar = Snackbar.make(
+        loadingMessageSnackbar = Snackbar.make(
             HelloArActivity.this.findViewById(android.R.id.content),
             "Searching for surfaces...", Snackbar.LENGTH_INDEFINITE);
-        mLoadingMessageSnackbar.getView().setBackgroundColor(0xbf323232);
-        mLoadingMessageSnackbar.show();
+        loadingMessageSnackbar.getView().setBackgroundColor(0xbf323232);
+        loadingMessageSnackbar.show();
       }
     });
   }
@@ -181,9 +181,9 @@ public class HelloArActivity extends AppCompatActivity {
     runOnUiThread(new Runnable() {
       @Override
       public void run() {
-        if (mLoadingMessageSnackbar != null) {
-          mLoadingMessageSnackbar.dismiss();
-          mLoadingMessageSnackbar = null;
+        if (loadingMessageSnackbar != null) {
+          loadingMessageSnackbar.dismiss();
+          loadingMessageSnackbar = null;
         }
       }
     });

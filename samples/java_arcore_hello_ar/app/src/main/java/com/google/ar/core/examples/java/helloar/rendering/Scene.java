@@ -23,12 +23,12 @@ import javax.microedition.khronos.opengles.GL10;
 public class Scene implements GLSurfaceView.Renderer {
   private static final String TAG = Scene.class.getSimpleName();
   // Temporary matrix allocated here to reduce number of allocations for each frame.
-  private final float[] mAnchorMatrix = new float[16];
-  private CameraFeedRenderer mCameraFeedRenderer = new CameraFeedRenderer();
-  private ObjectRenderer mVirtualObject = new ObjectRenderer();
-  private ObjectRenderer mVirtualObjectShadow = new ObjectRenderer();
-  private PlaneRenderer mPlaneRenderer = new PlaneRenderer();
-  private PointCloudRenderer mPointCloud = new PointCloudRenderer();
+  private final float[] anchorMatrix = new float[16];
+  private CameraFeedRenderer cameraFeedRenderer = new CameraFeedRenderer();
+  private ObjectRenderer objectRenderer = new ObjectRenderer();
+  private ObjectRenderer objectShadowRenderer = new ObjectRenderer();
+  private PlaneRenderer planeRenderer = new PlaneRenderer();
+  private PointCloudRenderer pointCloudRenderer = new PointCloudRenderer();
   private Context context;
   private GLSurfaceView surfaceView;
   private Session session;
@@ -62,28 +62,28 @@ public class Scene implements GLSurfaceView.Renderer {
     GLES20.glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
     // Create the texture and pass it to ARCore session to be filled during update().
-    mCameraFeedRenderer.createOnGlThread(context);
-    session.setCameraTextureName(mCameraFeedRenderer.getTextureId());
+    cameraFeedRenderer.createOnGlThread(context);
+    session.setCameraTextureName(cameraFeedRenderer.getTextureId());
 
     // Prepare the other rendering objects.
     try {
-      mVirtualObject.createOnGlThread(context, "andy.obj", "andy.png");
-      mVirtualObject.setMaterialProperties(0.0f, 3.5f, 1.0f, 6.0f);
+      objectRenderer.createOnGlThread(context, "andy.obj", "andy.png");
+      objectRenderer.setMaterialProperties(0.0f, 3.5f, 1.0f, 6.0f);
 
-      mVirtualObjectShadow.createOnGlThread(context,
+      objectShadowRenderer.createOnGlThread(context,
           "andy_shadow.obj", "andy_shadow.png");
-      mVirtualObjectShadow.setBlendMode(ObjectRenderer.BlendMode.Shadow);
-      mVirtualObjectShadow.setMaterialProperties(1.0f, 0.0f, 0.0f, 1.0f);
+      objectShadowRenderer.setBlendMode(ObjectRenderer.BlendMode.Shadow);
+      objectShadowRenderer.setMaterialProperties(1.0f, 0.0f, 0.0f, 1.0f);
     } catch (IOException e) {
       Log.e(TAG, "Failed to read obj file");
     }
 
     try {
-      mPlaneRenderer.createOnGlThread(context, "trigrid.png");
+      planeRenderer.createOnGlThread(context, "trigrid.png");
     } catch (IOException e) {
       Log.e(TAG, "Failed to read plane texture");
     }
-    mPointCloud.createOnGlThread(context);
+    pointCloudRenderer.createOnGlThread(context);
   }
 
   @Override
@@ -115,7 +115,7 @@ public class Scene implements GLSurfaceView.Renderer {
     }
 
     // Draw background.
-    mCameraFeedRenderer.draw(frame);
+    cameraFeedRenderer.draw(frame);
 
     // If not tracking, don't draw 3d objects.
     if (frame.getTrackingState() == Frame.TrackingState.NOT_TRACKING) {
@@ -134,8 +134,8 @@ public class Scene implements GLSurfaceView.Renderer {
     final float lightIntensity = frame.getLightEstimate().getPixelIntensity();
 
     // Visualize tracked points.
-    mPointCloud.update(frame.getPointCloud());
-    mPointCloud.draw(frame.getPointCloudPose(), viewmtx, projmtx);
+    pointCloudRenderer.update(frame.getPointCloud());
+    pointCloudRenderer.draw(frame.getPointCloudPose(), viewmtx, projmtx);
 
     // Check if we detected at least one plane. If so, hide the loading message.
     if (callback != null) {
@@ -149,7 +149,7 @@ public class Scene implements GLSurfaceView.Renderer {
     }
 
     // Visualize planes.
-    mPlaneRenderer.drawPlanes(session.getAllPlanes(), frame.getPose(), projmtx);
+    planeRenderer.drawPlanes(session.getAllPlanes(), frame.getPose(), projmtx);
 
     // Visualize anchors created by touch.
     float scaleFactor = 1.0f;
@@ -160,13 +160,13 @@ public class Scene implements GLSurfaceView.Renderer {
       // Get the current combined pose of an Anchor and Plane in world space. The Anchor
       // and Plane poses are updated during calls to session.update() as ARCore refines
       // its estimate of the world.
-      planeAttachment.getPose().toMatrix(mAnchorMatrix, 0);
+      planeAttachment.getPose().toMatrix(anchorMatrix, 0);
 
       // Update and draw the model and its shadow.
-      mVirtualObject.updateModelMatrix(mAnchorMatrix, scaleFactor);
-      mVirtualObjectShadow.updateModelMatrix(mAnchorMatrix, scaleFactor);
-      mVirtualObject.draw(viewmtx, projmtx, lightIntensity);
-      mVirtualObjectShadow.draw(viewmtx, projmtx, lightIntensity);
+      objectRenderer.updateModelMatrix(anchorMatrix, scaleFactor);
+      objectShadowRenderer.updateModelMatrix(anchorMatrix, scaleFactor);
+      objectRenderer.draw(viewmtx, projmtx, lightIntensity);
+      objectShadowRenderer.draw(viewmtx, projmtx, lightIntensity);
     }
   }
 
