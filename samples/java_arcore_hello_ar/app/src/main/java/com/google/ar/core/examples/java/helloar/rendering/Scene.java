@@ -7,9 +7,8 @@ import android.opengl.GLSurfaceView;
 import android.util.Log;
 
 import com.google.ar.core.Frame;
-import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
-import com.google.ar.core.PlaneHitResult;
+import com.google.ar.core.Pose;
 import com.google.ar.core.Session;
 import com.google.ar.core.exceptions.CameraException;
 import com.google.ar.core.exceptions.NotTrackingException;
@@ -34,7 +33,7 @@ public class Scene implements GLSurfaceView.Renderer {
   private GLSurfaceView surfaceView;
   private Session session;
   private DrawingCallback callback;
-  private ArrayList<PlaneAttachment> mTouches = new ArrayList<>();
+  private ArrayList<PlaneAttachment> attachments = new ArrayList<>();
 
   public Scene(Context context, GLSurfaceView surfaceView, Session session, DrawingCallback callback) {
     // Set up renderer.
@@ -154,7 +153,7 @@ public class Scene implements GLSurfaceView.Renderer {
 
     // Visualize anchors created by touch.
     float scaleFactor = 1.0f;
-    for (PlaneAttachment planeAttachment : mTouches) {
+    for (PlaneAttachment planeAttachment : attachments) {
       if (!planeAttachment.isTracking()) {
         continue;
       }
@@ -171,20 +170,20 @@ public class Scene implements GLSurfaceView.Renderer {
     }
   }
 
-  public void addTouch(HitResult hit) {
+  public void addAttachment(Plane plane, Pose pose) {
     // Cap the number of objects created. This avoids overloading both the
     // rendering system and ARCore.
-    if (mTouches.size() >= 16) {
-      session.removeAnchors(Arrays.asList(mTouches.get(0).getAnchor()));
-      mTouches.remove(0);
+    if (attachments.size() >= 16) {
+      session.removeAnchors(Arrays.asList(attachments.get(0).getAnchor()));
+      attachments.remove(0);
     }
     // Adding an Anchor tells ARCore that it should track this position in
     // space. This anchor will be used in PlaneAttachment to place the 3d model
     // in the correct position relative both to the world and to the plane.
     try {
-      mTouches.add(new PlaneAttachment(
-          ((PlaneHitResult) hit).getPlane(),
-          session.addAnchor(hit.getHitPose())));
+      attachments.add(new PlaneAttachment(
+          plane,
+          session.addAnchor(pose)));
     } catch (NotTrackingException e) {
       Log.e(TAG, "Session is not tracking.");
     }

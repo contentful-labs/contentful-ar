@@ -154,7 +154,8 @@ public class HelloArActivity extends AppCompatActivity {
       for (HitResult hit : frame.hitTest(tap)) {
         // Check if any plane was hit, and if it was hit inside the plane polygon.
         if (hit instanceof PlaneHitResult && ((PlaneHitResult) hit).isHitInPolygon()) {
-          scene.addTouch(hit);
+          final PlaneHitResult planeHitResult = (PlaneHitResult) hit;
+          scene.addAttachment(planeHitResult.getPlane(), hit.getHitPose());
 
           // Hits are sorted by depth. Consider only closest hit on a plane.
           break;
