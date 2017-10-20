@@ -32,7 +32,7 @@ public class CameraPermissionHelper {
    */
   public static boolean hasCameraPermission(Activity activity) {
     return ContextCompat.checkSelfPermission(activity, CAMERA_PERMISSION) ==
-            PackageManager.PERMISSION_GRANTED;
+        PackageManager.PERMISSION_GRANTED;
   }
 
   /**
@@ -40,6 +40,6 @@ public class CameraPermissionHelper {
    */
   public static void requestCameraPermission(Activity activity) {
     ActivityCompat.requestPermissions(activity, new String[]{CAMERA_PERMISSION},
-            CAMERA_PERMISSION_CODE);
+        CAMERA_PERMISSION_CODE);
   }
 }

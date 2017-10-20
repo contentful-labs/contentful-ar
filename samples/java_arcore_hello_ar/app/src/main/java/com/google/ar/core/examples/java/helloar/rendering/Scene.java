@@ -23,27 +23,17 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class Scene implements GLSurfaceView.Renderer {
   private static final String TAG = Scene.class.getSimpleName();
-
-  public interface DrawingCallback {
-    void onDraw(Frame frame);
-
-    void trackingPlane();
-  }
-
+  // Temporary matrix allocated here to reduce number of allocations for each frame.
+  private final float[] mAnchorMatrix = new float[16];
   private CameraFeedRenderer mCameraFeedRenderer = new CameraFeedRenderer();
   private ObjectRenderer mVirtualObject = new ObjectRenderer();
   private ObjectRenderer mVirtualObjectShadow = new ObjectRenderer();
   private PlaneRenderer mPlaneRenderer = new PlaneRenderer();
   private PointCloudRenderer mPointCloud = new PointCloudRenderer();
-
-  // Temporary matrix allocated here to reduce number of allocations for each frame.
-  private final float[] mAnchorMatrix = new float[16];
-
   private Context context;
   private GLSurfaceView surfaceView;
   private Session session;
   private DrawingCallback callback;
-
   private ArrayList<PlaneAttachment> mTouches = new ArrayList<>();
 
   public Scene(Context context, GLSurfaceView surfaceView, Session session, DrawingCallback callback) {
@@ -198,5 +188,11 @@ public class Scene implements GLSurfaceView.Renderer {
     } catch (NotTrackingException e) {
       Log.e(TAG, "Session is not tracking.");
     }
+  }
+
+  public interface DrawingCallback {
+    void onDraw(Frame frame);
+
+    void trackingPlane();
   }
 }
