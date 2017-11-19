@@ -63,7 +63,7 @@ public class HelloArActivity extends AppCompatActivity {
 
   // Tap handling and UI.
   private ArrayBlockingQueue<MotionEvent> queuedTaps = new ArrayBlockingQueue<>(16);
-  private int tapcount = 0;
+  private String nextObject = "parrot.obj";
 
   private final View.OnTouchListener tapListener = new View.OnTouchListener() {
     @Override
@@ -93,6 +93,8 @@ public class HelloArActivity extends AppCompatActivity {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     mSurfaceView = findViewById(R.id.surfaceview);
+
+    setupButtons();
 
     objectFactory = new ObjectRendererFactory(getExternalFilesDir(null).getAbsolutePath());
     session = new Session(this);
@@ -176,21 +178,23 @@ public class HelloArActivity extends AppCompatActivity {
           final PlaneHitResult planeHitResult = (PlaneHitResult) hit;
 
           final ObjectRenderer shadow = objectFactory.create("andy_shadow.obj");
-          shadow.setBlendMode(ObjectRenderer.BlendMode.Shadow);
-          scene.addRenderer(
-              shadow,
-              planeHitResult.getPlane(),
-              hit.getHitPose()
-          );
+          if (shadow != null) {
+            shadow.setBlendMode(ObjectRenderer.BlendMode.Shadow);
+            scene.addRenderer(
+                shadow,
+                planeHitResult.getPlane(),
+                hit.getHitPose()
+            );
+          }
 
-          final String[] objects = new String[]{"conner.obj", "andy.obj", "parrot.obj"};
-          final String object = objects[tapcount++ % objects.length];
-
-          scene.addRenderer(
-              objectFactory.create(object),
-              planeHitResult.getPlane(),
-              hit.getHitPose()
-          );
+          final ObjectRenderer object = objectFactory.create(nextObject);
+          if (nextObject != null) {
+            scene.addRenderer(
+                object,
+                planeHitResult.getPlane(),
+                hit.getHitPose()
+            );
+          }
 
           // Hits are sorted by depth. Consider only closest hit on a plane.
           break;
@@ -264,5 +268,24 @@ public class HelloArActivity extends AppCompatActivity {
         }
       }
     }
+  }
+
+  private void setupButtons() {
+    findViewById(R.id.main_button_bird).setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View view) {
+        nextObject = "parrot.obj";
+      }
+    });
+    findViewById(R.id.main_button_conner).setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View view) {
+        nextObject = "conner.obj";
+      }
+    });
+    findViewById(R.id.main_button_android).setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View view) {
+        nextObject = "andy.obj";
+      }
+    });
+
   }
 }

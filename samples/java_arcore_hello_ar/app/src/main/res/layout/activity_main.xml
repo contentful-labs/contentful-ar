@@ -13,11 +13,43 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 -->
-<android.opengl.GLSurfaceView
-    android:id="@+id/surfaceview"
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.google.ar.core.examples.java.helloar.HelloArActivity"
-    />
+    >
+
+    <Button
+        android:id="@+id/main_button_bird"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:checked="true"
+        android:text="🦅"
+        />
+
+    <Button
+        android:id="@+id/main_button_conner"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="C"
+        />
+
+    <Button
+        android:id="@+id/main_button_android"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:text="📱"
+        />
+
+    <android.opengl.GLSurfaceView
+        android:id="@+id/surfaceview"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context="com.google.ar.core.examples.java.helloar.HelloArActivity"
+        />
+</RelativeLayout>
