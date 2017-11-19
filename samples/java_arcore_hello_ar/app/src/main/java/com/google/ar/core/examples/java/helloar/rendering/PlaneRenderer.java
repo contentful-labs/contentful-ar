@@ -232,7 +232,7 @@ public class PlaneRenderer {
     mIndexBuffer.limit(numIndices);
 
     // Note: when either dimension of the bounding box is smaller than 2*FADE_RADIUS_M we
-    // generate a bunch of 0-area triangles.  These don't get rendered though so it works
+    // generate a bunch of 0-area triangles.  These don't create rendered though so it works
     // out ok.
     float xScale = Math.max((extentX - 2 * FADE_RADIUS_M) / extentX, 0.0f);
     float zScale = Math.max((extentZ - 2 * FADE_RADIUS_M) / extentZ, 0.0f);

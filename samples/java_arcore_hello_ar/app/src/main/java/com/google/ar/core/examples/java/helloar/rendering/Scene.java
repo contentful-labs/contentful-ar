@@ -15,7 +15,7 @@ import com.google.ar.core.exceptions.NotTrackingException;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.List;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -23,17 +23,14 @@ import javax.microedition.khronos.opengles.GL10;
 public class Scene implements GLSurfaceView.Renderer {
   private static final String TAG = Scene.class.getSimpleName();
   // Temporary matrix allocated here to reduce number of allocations for each frame.
-  private final float[] anchorMatrix = new float[16];
   private CameraFeedRenderer cameraFeedRenderer = new CameraFeedRenderer();
-  private ObjectRenderer objectRenderer = new ObjectRenderer();
-  private ObjectRenderer objectShadowRenderer = new ObjectRenderer();
+  private List<ObjectRenderer> objectRenderer = new ArrayList<>();
   private PlaneRenderer planeRenderer = new PlaneRenderer();
   private PointCloudRenderer pointCloudRenderer = new PointCloudRenderer();
   private Context context;
   private GLSurfaceView surfaceView;
   private Session session;
   private DrawingCallback callback;
-  private ArrayList<PlaneAttachment> attachments = new ArrayList<>();
 
   public Scene(Context context, GLSurfaceView surfaceView, Session session, DrawingCallback callback) {
     // Set up renderer.
@@ -66,18 +63,6 @@ public class Scene implements GLSurfaceView.Renderer {
     session.setCameraTextureName(cameraFeedRenderer.getTextureId());
 
     // Prepare the other rendering objects.
-    try {
-      objectRenderer.createOnGlThread(context, "andy.obj", "andy.png");
-      objectRenderer.setMaterialProperties(0.0f, 3.5f, 1.0f, 6.0f);
-
-      objectShadowRenderer.createOnGlThread(context,
-          "andy_shadow.obj", "andy_shadow.png");
-      objectShadowRenderer.setBlendMode(ObjectRenderer.BlendMode.Shadow);
-      objectShadowRenderer.setMaterialProperties(1.0f, 0.0f, 0.0f, 1.0f);
-    } catch (IOException e) {
-      Log.e(TAG, "Failed to read obj file");
-    }
-
     try {
       planeRenderer.createOnGlThread(context, "trigrid.png");
     } catch (IOException e) {
@@ -153,40 +138,39 @@ public class Scene implements GLSurfaceView.Renderer {
 
     // Visualize anchors created by touch.
     float scaleFactor = 1.0f;
-    for (PlaneAttachment planeAttachment : attachments) {
-      if (!planeAttachment.isTracking()) {
+    for (final ObjectRenderer renderer : objectRenderer) {
+      if (!renderer.isTracking()) {
         continue;
       }
-      // Get the current combined pose of an Anchor and Plane in world space. The Anchor
-      // and Plane poses are updated during calls to session.update() as ARCore refines
-      // its estimate of the world.
-      planeAttachment.getPose().toMatrix(anchorMatrix, 0);
 
-      // Update and draw the model and its shadow.
-      objectRenderer.updateModelMatrix(anchorMatrix, scaleFactor);
-      objectShadowRenderer.updateModelMatrix(anchorMatrix, scaleFactor);
-      objectRenderer.draw(viewmtx, projmtx, lightIntensity);
-      objectShadowRenderer.draw(viewmtx, projmtx, lightIntensity);
+      // Update and draw each model.
+      renderer.updateModelMatrix(scaleFactor);
+      renderer.draw(viewmtx, projmtx, lightIntensity);
     }
   }
 
-  public void addAttachment(Plane plane, Pose pose) {
+  public void addRenderer(ObjectRenderer renderer, Plane plane, Pose pose) {
     // Cap the number of objects created. This avoids overloading both the
     // rendering system and ARCore.
-    if (attachments.size() >= 16) {
-      session.removeAnchors(Arrays.asList(attachments.get(0).getAnchor()));
-      attachments.remove(0);
+    if (objectRenderer.size() >= 16) {
+      objectRenderer.get(0).destroy(session);
+      objectRenderer.remove(0);
     }
+
     // Adding an Anchor tells ARCore that it should track this position in
     // space. This anchor will be used in PlaneAttachment to place the 3d model
     // in the correct position relative both to the world and to the plane.
     try {
-      attachments.add(new PlaneAttachment(
-          plane,
-          session.addAnchor(pose)));
+      renderer.setAttachement(
+          new PlaneAttachment(
+              plane,
+              session.addAnchor(pose))
+      );
     } catch (NotTrackingException e) {
       Log.e(TAG, "Session is not tracking.");
     }
+
+    objectRenderer.add(renderer);
   }
 
   public interface DrawingCallback {

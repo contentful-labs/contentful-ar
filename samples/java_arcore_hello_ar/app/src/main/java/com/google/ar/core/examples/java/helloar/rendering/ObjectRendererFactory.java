@@ -1,0 +1,50 @@
+package com.google.ar.core.examples.java.helloar.rendering;
+
+
+import static com.google.ar.core.examples.java.helloar.rendering.ShaderUtil.normalizeFileName;
+
+public class ObjectRendererFactory {
+  private static final String DEFAULT_FRAGMENT_SHADER_FILE_NAME = "object_fragment.shader";
+  private static final String DEFAULT_VERTEX_SHADER_FILE_NAME = "object_vertex.shader";
+
+  private final String basepath;
+
+  public ObjectRendererFactory(String basepath) {
+    if (!basepath.endsWith("/")) {
+      basepath = basepath + "/";
+    }
+
+    this.basepath = basepath;
+  }
+
+  public ObjectRenderer create(String objectFileName) {
+    objectFileName = normalizeFileName(objectFileName, basepath);
+    return create(
+        objectFileName,
+        objectFileNameToTextureFileName(objectFileName));
+  }
+
+  public ObjectRenderer create(String objectFileName,
+                               String textureFileName) {
+    return create(
+        objectFileName,
+        textureFileName,
+        normalizeFileName(DEFAULT_VERTEX_SHADER_FILE_NAME, basepath),
+        normalizeFileName(DEFAULT_FRAGMENT_SHADER_FILE_NAME, basepath));
+  }
+
+  public ObjectRenderer create(String objectFileName,
+                               String textureFileName,
+                               String vertexShaderFileName,
+                               String fragmentShaderFileName) {
+    return new ObjectRenderer(objectFileName, textureFileName, fragmentShaderFileName, vertexShaderFileName);
+  }
+
+  private String objectFileNameToTextureFileName(String fileName) {
+    if (fileName.toLowerCase().endsWith(".obj")) {
+      return fileName.substring(0, fileName.length() - 4).concat(".png");
+    } else {
+      return fileName.concat(".png");
+    }
+  }
+}

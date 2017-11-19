@@ -33,6 +33,8 @@ import com.google.ar.core.Frame.TrackingState;
 import com.google.ar.core.HitResult;
 import com.google.ar.core.PlaneHitResult;
 import com.google.ar.core.Session;
+import com.google.ar.core.examples.java.helloar.rendering.ObjectRenderer;
+import com.google.ar.core.examples.java.helloar.rendering.ObjectRendererFactory;
 import com.google.ar.core.examples.java.helloar.rendering.Scene;
 
 import java.io.File;
@@ -83,12 +85,15 @@ public class HelloArActivity extends AppCompatActivity {
     }
   };
 
+  private ObjectRendererFactory objectFactory;
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
     mSurfaceView = findViewById(R.id.surfaceview);
 
+    objectFactory = new ObjectRendererFactory(getExternalFilesDir(null).getAbsolutePath());
     session = new Session(this);
     scene = new Scene(this, mSurfaceView, session, drawCallback);
 
@@ -127,7 +132,7 @@ public class HelloArActivity extends AppCompatActivity {
     super.onPause();
     // Note that the order matters - GLSurfaceView is paused first so that it does not try
     // to query the session. If Session is paused before GLSurfaceView, GLSurfaceView may
-    // still call session.update() and get a SessionPausedException.
+    // still call session.update() and create a SessionPausedException.
     scene.unbind();
     session.pause();
   }
@@ -166,7 +171,20 @@ public class HelloArActivity extends AppCompatActivity {
         // Check if any plane was hit, and if it was hit inside the plane polygon.
         if (hit instanceof PlaneHitResult && ((PlaneHitResult) hit).isHitInPolygon()) {
           final PlaneHitResult planeHitResult = (PlaneHitResult) hit;
-          scene.addAttachment(planeHitResult.getPlane(), hit.getHitPose());
+
+          final ObjectRenderer shadow = objectFactory.create("andy_shadow.obj");
+          shadow.setBlendMode(ObjectRenderer.BlendMode.Shadow);
+          scene.addRenderer(
+              shadow,
+              planeHitResult.getPlane(),
+              hit.getHitPose()
+          );
+
+          scene.addRenderer(
+              objectFactory.create("andy.obj"),
+              planeHitResult.getPlane(),
+              hit.getHitPose()
+          );
 
           // Hits are sorted by depth. Consider only closest hit on a plane.
           break;

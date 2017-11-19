@@ -20,6 +20,7 @@ import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
 
+import com.google.ar.core.Session;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -33,6 +34,8 @@ import de.javagl.obj.Obj;
 import de.javagl.obj.ObjData;
 import de.javagl.obj.ObjReader;
 import de.javagl.obj.ObjUtils;
+
+import static java.util.Collections.singletonList;
 
 /**
  * Renders an object loaded from an OBJ file in OpenGL.
@@ -76,7 +79,26 @@ public class ObjectRenderer {
   private float mDiffuse = 1.0f;
   private float mSpecular = 1.0f;
   private float mSpecularPower = 6.0f;
+  // cache model view matrix
+  private final float[] modelMatrix = new float[16];
+  private PlaneAttachment mAttachement;
+  private boolean mInitialized = false;
 
+  private final String mObjectFileName;
+  private final String mTextureFileName;
+  private final String mFragmentShaderFileName;
+  private final String mVertexShaderFileName;
+
+  public ObjectRenderer(
+      String mObjectFileName,
+      String textureFileName,
+      String fragmentShaderFileName,
+      String vertexShaderFileName) {
+    this.mObjectFileName = mObjectFileName;
+    this.mTextureFileName = textureFileName;
+    this.mFragmentShaderFileName = fragmentShaderFileName;
+    this.mVertexShaderFileName = vertexShaderFileName;
+  }
 
   public static void normalizeVec3(float[] v) {
     float reciprocalLength = 1.0f / (float) Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
@@ -214,16 +236,18 @@ public class ObjectRenderer {
   /**
    * Updates the object model matrix and applies scaling.
    *
-   * @param modelMatrix A 4x4 model-to-world transformation matrix, stored in column-major order.
    * @param scaleFactor A separate scaling factor to apply before the {@code modelMatrix}.
    * @see android.opengl.Matrix
    */
-  public void updateModelMatrix(float[] modelMatrix, float scaleFactor) {
+  public void updateModelMatrix(float scaleFactor) {
+    mAttachement.getPose().toMatrix(modelMatrix, 0);
+
     float[] scaleMatrix = new float[16];
     Matrix.setIdentityM(scaleMatrix, 0);
     scaleMatrix[0] = scaleFactor;
     scaleMatrix[5] = scaleFactor;
     scaleMatrix[10] = scaleFactor;
+
     Matrix.multiplyMM(mModelMatrix, 0, modelMatrix, 0, scaleMatrix, 0);
   }
 
@@ -252,11 +276,20 @@ public class ObjectRenderer {
    * @param lightIntensity    Illumination intensity.  Combined with diffuse and specular material
    *                          properties.
    * @see #setBlendMode(BlendMode)
-   * @see #updateModelMatrix(float[], float)
+   * @see #updateModelMatrix(float)
    * @see #setMaterialProperties(float, float, float, float)
    * @see android.opengl.Matrix
    */
   public void draw(float[] cameraView, float[] cameraPerspective, float lightIntensity) {
+    if (!isInitialized()) {
+      setMaterialProperties(0.0f, 3.5f, 1.0f, 6.0f);
+      try {
+        createOnGlThread();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      return;
+    }
 
     ShaderUtil.checkGLError(TAG, "Before draw");
 
@@ -337,6 +370,22 @@ public class ObjectRenderer {
     GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
 
     ShaderUtil.checkGLError(TAG, "After draw");
+  }
+
+  public boolean isTracking() {
+    return mAttachement.isTracking();
+  }
+
+  public void setAttachement(PlaneAttachment attachement) {
+    this.mAttachement = attachement;
+  }
+
+  public boolean isInitialized() {
+    return mInitialized;
+  }
+
+  public void destroy(Session session) {
+    session.removeAnchors(singletonList(mAttachement.getAnchor()));
   }
 
   /**
