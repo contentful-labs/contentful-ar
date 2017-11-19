@@ -149,6 +149,10 @@ public class Scene implements GLSurfaceView.Renderer {
     }
   }
 
+  public int getRendererCount() {
+    return objectRenderer.size();
+  }
+
   public void addRenderer(ObjectRenderer renderer, Plane plane, Pose pose) {
     // Cap the number of objects created. This avoids overloading both the
     // rendering system and ARCore.

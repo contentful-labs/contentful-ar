@@ -63,6 +63,7 @@ public class HelloArActivity extends AppCompatActivity {
 
   // Tap handling and UI.
   private ArrayBlockingQueue<MotionEvent> queuedTaps = new ArrayBlockingQueue<>(16);
+  private int tapcount = 0;
 
   private final View.OnTouchListener tapListener = new View.OnTouchListener() {
     @Override
@@ -166,7 +167,9 @@ public class HelloArActivity extends AppCompatActivity {
     // Handle taps. Handling only one tap per frame, as taps are usually low frequency
     // compared to frame rate.
     MotionEvent tap = queuedTaps.poll();
-    if (tap != null && frame.getTrackingState() == TrackingState.TRACKING) {
+    if (tap != null
+        && tap.getAction() == MotionEvent.ACTION_UP
+        && frame.getTrackingState() == TrackingState.TRACKING) {
       for (HitResult hit : frame.hitTest(tap)) {
         // Check if any plane was hit, and if it was hit inside the plane polygon.
         if (hit instanceof PlaneHitResult && ((PlaneHitResult) hit).isHitInPolygon()) {
@@ -180,8 +183,11 @@ public class HelloArActivity extends AppCompatActivity {
               hit.getHitPose()
           );
 
+          final String[] objects = new String[]{"conner.obj", "andy.obj", "parrot.obj"};
+          final String object = objects[tapcount++ % objects.length];
+
           scene.addRenderer(
-              objectFactory.create("andy.obj"),
+              objectFactory.create(object),
               planeHitResult.getPlane(),
               hit.getHitPose()
           );
