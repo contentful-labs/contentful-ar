@@ -16,10 +16,12 @@
 
 package com.google.ar.core.examples.java.helloar;
 
+import android.content.res.AssetManager;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -33,7 +35,14 @@ import com.google.ar.core.PlaneHitResult;
 import com.google.ar.core.Session;
 import com.google.ar.core.examples.java.helloar.rendering.Scene;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.concurrent.ArrayBlockingQueue;
+
+import static com.google.tango.javacommon.FileUtils.copyStream;
 
 /**
  * This is a simple example that shows how to create an augmented reality (AR) application using
@@ -93,6 +102,8 @@ public class HelloArActivity extends AppCompatActivity {
 
     // Set up tap listener.
     mSurfaceView.setOnTouchListener(tapListener);
+
+    copyAssetsToSdCard();
   }
 
   @Override
@@ -187,5 +198,47 @@ public class HelloArActivity extends AppCompatActivity {
         }
       }
     });
+  }
+
+  private void copyAssetsToSdCard() {
+    final AssetManager assets = getAssets();
+    final String[] assetArray;
+    try {
+      assetArray = assets.list("");
+    } catch (IOException e) {
+      Log.e(TAG, "Could not list assets.", e);
+      return;
+    }
+
+    final File outputDir = getExternalFilesDir(null);
+    if (outputDir == null) {
+      Log.e(TAG, "Could not find default external directory");
+      return;
+    }
+
+    for (final String file : assetArray) {
+      final String localCopyName = outputDir.getAbsolutePath() + "/" + file;
+
+      // ignore files without an extension (mostly folders)
+      if (!localCopyName.contains(".")) {
+        continue;
+      }
+
+      OutputStream outputStream;
+      try {
+        outputStream = new FileOutputStream(localCopyName);
+      } catch (FileNotFoundException e) {
+        Log.e(TAG, "Could not open copy file: '" + localCopyName + "'.");
+        outputStream = null;
+      }
+
+      if (outputStream != null) {
+        try {
+          copyStream(assets.open(file), outputStream);
+        } catch (IOException e) {
+          Log.i(TAG, "Could not open asset file: '" + file + "'.");
+        }
+      }
+    }
   }
 }

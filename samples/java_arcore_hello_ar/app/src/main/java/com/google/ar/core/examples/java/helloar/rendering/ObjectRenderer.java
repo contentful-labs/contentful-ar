@@ -14,17 +14,15 @@
  */
 package com.google.ar.core.examples.java.helloar.rendering;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
 
-import com.google.ar.core.examples.java.helloar.R;
 
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -89,16 +87,10 @@ public class ObjectRenderer {
 
   /**
    * Creates and initializes OpenGL resources needed for rendering the model.
-   *
-   * @param context                 Context for loading the shader and below-named model and texture assets.
-   * @param objAssetName            Name of the OBJ file containing the model geometry.
-   * @param diffuseTextureAssetName Name of the PNG file containing the diffuse texture map.
    */
-  public void createOnGlThread(Context context, String objAssetName,
-                               String diffuseTextureAssetName) throws IOException {
+  public void createOnGlThread() throws IOException {
     // Read the texture.
-    Bitmap textureBitmap = BitmapFactory.decodeStream(
-        context.getAssets().open(diffuseTextureAssetName));
+    Bitmap textureBitmap = BitmapFactory.decodeStream(new FileInputStream(mTextureFileName));
 
     GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
     GLES20.glGenTextures(mTextures.length, mTextures, 0);
@@ -117,8 +109,7 @@ public class ObjectRenderer {
     ShaderUtil.checkGLError(TAG, "Texture loading");
 
     // Read the obj file.
-    InputStream objInputStream = context.getAssets().open(objAssetName);
-    Obj obj = ObjReader.read(objInputStream);
+    Obj obj = ObjReader.read(new FileInputStream(mObjectFileName));
 
     // Prepare the Obj so that its structure is suitable for
     // rendering with OpenGL:
@@ -175,10 +166,13 @@ public class ObjectRenderer {
 
     ShaderUtil.checkGLError(TAG, "OBJ buffer load");
 
-    final int vertexShader = ShaderUtil.loadGLShader(TAG, context,
-        GLES20.GL_VERTEX_SHADER, R.raw.object_vertex);
-    final int fragmentShader = ShaderUtil.loadGLShader(TAG, context,
-        GLES20.GL_FRAGMENT_SHADER, R.raw.object_fragment);
+    final int vertexShader = ShaderUtil.loadGLShader(TAG,
+        mVertexShaderFileName,
+        GLES20.GL_VERTEX_SHADER);
+
+    final int fragmentShader = ShaderUtil.loadGLShader(TAG,
+        mFragmentShaderFileName,
+        GLES20.GL_FRAGMENT_SHADER);
 
     mProgram = GLES20.glCreateProgram();
     GLES20.glAttachShader(mProgram, vertexShader);
@@ -204,6 +198,8 @@ public class ObjectRenderer {
     ShaderUtil.checkGLError(TAG, "Program parameters");
 
     Matrix.setIdentityM(mModelMatrix, 0);
+
+    mInitialized = true;
   }
 
   /**

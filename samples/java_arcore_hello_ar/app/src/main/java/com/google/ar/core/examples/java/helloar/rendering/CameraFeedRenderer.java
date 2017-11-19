@@ -21,7 +21,6 @@ import android.opengl.GLSurfaceView;
 
 import com.google.ar.core.Frame;
 import com.google.ar.core.Session;
-import com.google.ar.core.examples.java.helloar.R;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -105,10 +104,15 @@ public class CameraFeedRenderer {
     bbTexCoordsTransformed.order(ByteOrder.nativeOrder());
     mQuadTexCoordTransformed = bbTexCoordsTransformed.asFloatBuffer();
 
-    int vertexShader = ShaderUtil.loadGLShader(TAG, context,
-        GLES20.GL_VERTEX_SHADER, R.raw.screenquad_vertex);
-    int fragmentShader = ShaderUtil.loadGLShader(TAG, context,
-        GLES20.GL_FRAGMENT_SHADER, R.raw.screenquad_fragment_oes);
+    final String basepath = context.getExternalFilesDir(null).getAbsolutePath();
+    int vertexShader = ShaderUtil.loadGLShader(
+        TAG,
+        ShaderUtil.normalizeFileName("screenquad_vertex.shader", basepath),
+        GLES20.GL_VERTEX_SHADER);
+    int fragmentShader = ShaderUtil.loadGLShader(
+        TAG,
+        ShaderUtil.normalizeFileName("screenquad_fragment_oes.shader", basepath),
+        GLES20.GL_FRAGMENT_SHADER);
 
     mQuadProgram = GLES20.glCreateProgram();
     GLES20.glAttachShader(mQuadProgram, vertexShader);

@@ -75,10 +75,16 @@ public class PointCloudRenderer {
 
     ShaderUtil.checkGLError(TAG, "buffer alloc");
 
-    int vertexShader = ShaderUtil.loadGLShader(TAG, context,
-        GLES20.GL_VERTEX_SHADER, R.raw.point_cloud_vertex);
-    int passthroughShader = ShaderUtil.loadGLShader(TAG, context,
-        GLES20.GL_FRAGMENT_SHADER, R.raw.passthrough_fragment);
+    final String basepath = context.getExternalFilesDir(null).getAbsolutePath();
+    int vertexShader = ShaderUtil.loadGLShader(
+        TAG,
+        ShaderUtil.normalizeFileName("point_cloud_vertex.shader", basepath),
+        GLES20.GL_VERTEX_SHADER);
+
+    int passthroughShader = ShaderUtil.loadGLShader(
+        TAG,
+        ShaderUtil.normalizeFileName("passthrough_fragment.shader", basepath),
+        GLES20.GL_FRAGMENT_SHADER);
 
     mProgramName = GLES20.glCreateProgram();
     GLES20.glAttachShader(mProgramName, vertexShader);
