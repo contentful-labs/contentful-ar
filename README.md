@@ -1,7 +1,7 @@
-Google AR SDK
-=====================
-Copyright (c) 2017 Google Inc.  All rights reserved.
+Pirate AR SDK Sample based on Google AR SDK
+===========================================
 
-[https://developers.google.com/ar/develop/java/getting-started](https://developers.google.com/ar/develop/java/getting-started)
+[Googles Getting Started With AR](https://developers.google.com/ar/develop/java/getting-started)
 
-Please note, we do not accept pull requests.
+[My overview slides](https://bit.ly/pirate-ar-slides)
+
