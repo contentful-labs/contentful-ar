@@ -36,6 +36,7 @@ import com.google.ar.core.Session;
 import com.google.ar.core.examples.java.helloar.rendering.ObjectRenderer;
 import com.google.ar.core.examples.java.helloar.rendering.ObjectRendererFactory;
 import com.google.ar.core.examples.java.helloar.rendering.Scene;
+import com.google.ar.core.examples.java.helloar.rendering.XmlLayoutRenderer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -187,8 +188,14 @@ public class HelloArActivity extends AppCompatActivity {
             );
           }
 
-          final ObjectRenderer object = objectFactory.create(nextObject);
-          if (nextObject != null) {
+          final ObjectRenderer object;
+          if (nextObject.length() != 0) {
+            object = objectFactory.create(nextObject);
+          } else {
+            object = new XmlLayoutRenderer(getApplicationContext(), R.layout.ar_sample_layout);
+          }
+
+          if (object != null) {
             scene.addRenderer(
                 object,
                 planeHitResult.getPlane(),
@@ -286,6 +293,10 @@ public class HelloArActivity extends AppCompatActivity {
         nextObject = "andy.obj";
       }
     });
-
+    findViewById(R.id.main_button_speech).setOnClickListener(new View.OnClickListener() {
+      @Override public void onClick(View view) {
+        nextObject = "";
+      }
+    });
   }
 }

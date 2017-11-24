@@ -23,6 +23,7 @@ import android.opengl.Matrix;
 import com.google.ar.core.Session;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -111,8 +112,7 @@ public class ObjectRenderer {
    * Creates and initializes OpenGL resources needed for rendering the model.
    */
   public void createOnGlThread() throws IOException {
-    // Read the texture.
-    Bitmap textureBitmap = BitmapFactory.decodeStream(new FileInputStream(mTextureFileName));
+    Bitmap textureBitmap = readTexture();
 
     GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
     GLES20.glGenTextures(mTextures.length, mTextures, 0);
@@ -222,6 +222,10 @@ public class ObjectRenderer {
     Matrix.setIdentityM(mModelMatrix, 0);
 
     mInitialized = true;
+  }
+
+  protected Bitmap readTexture() throws FileNotFoundException {
+    return BitmapFactory.decodeStream(new FileInputStream(mTextureFileName));
   }
 
   /**

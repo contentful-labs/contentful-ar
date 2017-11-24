@@ -7,8 +7,8 @@ import static com.google.ar.core.examples.java.helloar.rendering.ShaderUtil.norm
 
 public class ObjectRendererFactory {
   private static final String TAG = ObjectRendererFactory.class.getSimpleName();
-  private static final String DEFAULT_FRAGMENT_SHADER_FILE_NAME = "object_fragment.shader";
-  private static final String DEFAULT_VERTEX_SHADER_FILE_NAME = "object_vertex.shader";
+  static final String DEFAULT_FRAGMENT_SHADER_FILE_NAME = "object_fragment.shader";
+  static final String DEFAULT_VERTEX_SHADER_FILE_NAME = "object_vertex.shader";
 
   private final String basepath;
 
