@@ -16,4 +16,4 @@
 /**
  * This package contains classes that do the rendering for this example.
  */
-package com.google.ar.core.examples.java.helloar.rendering;
+package net.mariobodemann.piratear.rendering;

@@ -1,9 +1,9 @@
-package com.google.ar.core.examples.java.helloar.rendering;
+package net.mariobodemann.piratear.rendering;
 
 
 import java.io.File;
 
-import static com.google.ar.core.examples.java.helloar.rendering.ShaderUtil.normalizeFileName;
+import static net.mariobodemann.piratear.rendering.ShaderUtil.normalizeFileName;
 
 public class ObjectRendererFactory {
   private static final String TAG = ObjectRendererFactory.class.getSimpleName();

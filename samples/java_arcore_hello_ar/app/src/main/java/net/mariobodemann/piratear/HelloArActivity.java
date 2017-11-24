@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.google.ar.core.examples.java.helloar;
+package net.mariobodemann.piratear;
 
 import android.content.res.AssetManager;
 import android.opengl.GLSurfaceView;
@@ -33,10 +33,11 @@ import com.google.ar.core.Frame.TrackingState;
 import com.google.ar.core.HitResult;
 import com.google.ar.core.PlaneHitResult;
 import com.google.ar.core.Session;
-import com.google.ar.core.examples.java.helloar.rendering.ObjectRenderer;
-import com.google.ar.core.examples.java.helloar.rendering.ObjectRendererFactory;
-import com.google.ar.core.examples.java.helloar.rendering.Scene;
-import com.google.ar.core.examples.java.helloar.rendering.XmlLayoutRenderer;
+
+import net.mariobodemann.piratear.rendering.ObjectRenderer;
+import net.mariobodemann.piratear.rendering.ObjectRendererFactory;
+import net.mariobodemann.piratear.rendering.Scene;
+import net.mariobodemann.piratear.rendering.XmlLayoutRenderer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -255,7 +256,7 @@ public class HelloArActivity extends AppCompatActivity {
       final String localCopyName = outputDir.getAbsolutePath() + "/" + file;
 
       // ignore files without an extension (mostly folders)
-      if (!localCopyName.contains(".")) {
+      if (!localCopyName.contains("")) {
         continue;
       }
 

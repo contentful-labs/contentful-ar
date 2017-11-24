@@ -15,7 +15,7 @@
    limitations under the License.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.google.ar.core.examples.java.helloar"
+    package="net.mariobodemann.piratear"
     >
 
     <uses-permission android:name="android.permission.CAMERA" />

@@ -1,4 +1,4 @@
-package com.google.ar.core.examples.java.helloar.rendering;
+package net.mariobodemann.piratear.rendering;
 
 
 import android.content.Context;
@@ -12,7 +12,7 @@ import android.view.View;
 
 import java.io.FileNotFoundException;
 
-import static com.google.ar.core.examples.java.helloar.rendering.ShaderUtil.normalizeFileName;
+import static net.mariobodemann.piratear.rendering.ShaderUtil.normalizeFileName;
 
 public class XmlLayoutRenderer extends ObjectRenderer {
   private Bitmap bitmap;
