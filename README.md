@@ -18,9 +18,7 @@ Slides acompaning this demo 🏴‍☠️
 
 Enjoy, and if you have any questions, please feel free to reach out to me [Mario](twitter.com/mario.bodemann).
 
-Sponsorship note
-++++++++++++++++
+Notes
+----------------
 
-This project is supported by Contentful GmnbH, as me Mario could work on it at worktime.
-
-[Contentful](https://www.contentful.com) provides a content infrastructure for digital teams to power content in websites, apps, and devices. Unlike a CMS Contentful was built to integrate with the modern software stack. It offers a central hub for structured content, powerful management and delivery APIs, and a customizable web app that enable developers and content creators to ship digital products faster.
+* The original source comes from Google, see [here](https://github.com/google-ar/arcore-android-sdk). This work is not endorsed, affiliated, approved or in anyway related to Google. It just takes it's based on their demo code.
