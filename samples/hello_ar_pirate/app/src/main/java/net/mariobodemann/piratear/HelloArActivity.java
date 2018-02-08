@@ -27,15 +27,21 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import com.google.ar.core.Camera;
 import com.google.ar.core.Config;
 import com.google.ar.core.Frame;
 import com.google.ar.core.HitResult;
+import com.google.ar.core.Plane;
 import com.google.ar.core.Session;
+import com.google.ar.core.Trackable;
+import com.google.ar.core.Trackable.TrackingState;
 
 import net.mariobodemann.piratear.rendering.ObjectRenderer;
 import net.mariobodemann.piratear.rendering.ObjectRendererFactory;
 import net.mariobodemann.piratear.rendering.Scene;
 import net.mariobodemann.piratear.rendering.XmlLayoutRenderer;
+
+import org.apache.commons.io.IOUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -75,11 +81,13 @@ public class HelloArActivity extends AppCompatActivity {
   };
 
   private final Scene.DrawingCallback drawCallback = new Scene.DrawingCallback() {
-    @Override public void onDraw(Frame frame) {
+    @Override
+    public void onDraw(Frame frame) {
       handleTap(frame);
     }
 
-    @Override public void trackingPlane() {
+    @Override
+    public void trackingPlane() {
       hideLoadingMessage();
     }
   };
@@ -99,7 +107,7 @@ public class HelloArActivity extends AppCompatActivity {
     scene = new Scene(this, mSurfaceView, session, drawCallback);
 
     // Create default config, check is supported, create session from that config.
-    defaultConfig = Config.createDefaultConfig();
+    defaultConfig = new Config(session);
     if (!session.isSupported(defaultConfig)) {
       Toast.makeText(this, "This device does not support AR", Toast.LENGTH_LONG).show();
       finish();
@@ -121,7 +129,7 @@ public class HelloArActivity extends AppCompatActivity {
     if (CameraPermissionHelper.hasCameraPermission(this)) {
       showLoadingMessage();
       // Note that order matters - see the note in onPause(), the reverse applies here.
-      session.resume(defaultConfig);
+      session.resume();
       scene.bind();
     } else {
       CameraPermissionHelper.requestCameraPermission(this);
@@ -167,21 +175,23 @@ public class HelloArActivity extends AppCompatActivity {
     // Handle taps. Handling only one tap per frame, as taps are usually low frequency
     // compared to frame rate.
     MotionEvent tap = queuedTaps.poll();
+    Camera camera = frame.getCamera();
     if (tap != null
         && tap.getAction() == MotionEvent.ACTION_UP
-        && frame.getTrackingState() == TrackingState.TRACKING) {
+        && camera.getTrackingState() == TrackingState.TRACKING) {
       for (HitResult hit : frame.hitTest(tap)) {
         // Check if any plane was hit, and if it was hit inside the plane polygon.
-        if (hit instanceof PlaneHitResult && ((PlaneHitResult) hit).isHitInPolygon()) {
-          final PlaneHitResult planeHitResult = (PlaneHitResult) hit;
+        Trackable trackable = hit.getTrackable();
+        if (trackable instanceof Plane
+            && ((Plane) trackable).isPoseInPolygon(hit.getHitPose())) {
 
           final ObjectRenderer shadow = objectFactory.create("andy_shadow.obj");
           if (shadow != null) {
             shadow.setBlendMode(ObjectRenderer.BlendMode.Shadow);
             scene.addRenderer(
                 shadow,
-                planeHitResult.getPlane(),
-                hit.getHitPose()
+                (Plane)trackable,
+                hit.createAnchor()
             );
           }
 
@@ -195,8 +205,8 @@ public class HelloArActivity extends AppCompatActivity {
           if (object != null) {
             scene.addRenderer(
                 object,
-                planeHitResult.getPlane(),
-                hit.getHitPose()
+                (Plane)trackable,
+                hit.createAnchor()
             );
           }
 
@@ -266,7 +276,7 @@ public class HelloArActivity extends AppCompatActivity {
 
       if (outputStream != null) {
         try {
-          copyStream(assets.open(file), outputStream);
+          IOUtils.copy(assets.open(file), outputStream);
         } catch (IOException e) {
           Log.i(TAG, "Could not open asset file: '" + file + "'.");
         }
@@ -276,22 +286,26 @@ public class HelloArActivity extends AppCompatActivity {
 
   private void setupButtons() {
     findViewById(R.id.main_button_bird).setOnClickListener(new View.OnClickListener() {
-      @Override public void onClick(View view) {
+      @Override
+      public void onClick(View view) {
         nextObject = "parrot.obj";
       }
     });
     findViewById(R.id.main_button_conner).setOnClickListener(new View.OnClickListener() {
-      @Override public void onClick(View view) {
+      @Override
+      public void onClick(View view) {
         nextObject = "conner.obj";
       }
     });
     findViewById(R.id.main_button_android).setOnClickListener(new View.OnClickListener() {
-      @Override public void onClick(View view) {
+      @Override
+      public void onClick(View view) {
         nextObject = "andy.obj";
       }
     });
     findViewById(R.id.main_button_speech).setOnClickListener(new View.OnClickListener() {
-      @Override public void onClick(View view) {
+      @Override
+      public void onClick(View view) {
         nextObject = "";
       }
     });

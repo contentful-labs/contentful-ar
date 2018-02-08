@@ -130,8 +130,8 @@ public class CameraFeedRenderer {
 
   /**
    * Draws the AR background image.  The image will be drawn such that virtual content rendered
-   * with the matrices provided by {@link Frame#getViewMatrix(float[], int)} and
-   * {@link Session#getProjectionMatrix(float[], int, float, float)} will accurately follow
+   * with the matrices provided by {@link com.google.ar.core.Camera#getViewMatrix(float[], int)} and
+   * {@link com.google.ar.core.Camera#getProjectionMatrix(float[], int, float, float)} will accurately follow
    * static physical objects.  This must be called <b>before</b> drawing virtual content.
    *
    * @param frame The last {@code Frame} returned by {@link Session#update()}.
@@ -139,7 +139,7 @@ public class CameraFeedRenderer {
   public void draw(Frame frame) {
     // If display rotation changed (also includes view size change), we need to re-query the uv
     // coordinates for the screen rect, as they may have changed as well.
-    if (frame.isDisplayRotationChanged()) {
+    if (frame.hasDisplayGeometryChanged()) {
       frame.transformDisplayUvCoords(mQuadTexCoord, mQuadTexCoordTransformed);
     }
 

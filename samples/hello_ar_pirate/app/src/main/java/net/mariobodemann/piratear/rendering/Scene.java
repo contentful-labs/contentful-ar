@@ -6,12 +6,16 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.util.Log;
 
+import com.google.ar.core.Anchor;
+import com.google.ar.core.Camera;
 import com.google.ar.core.Frame;
 import com.google.ar.core.Plane;
-import com.google.ar.core.Pose;
+import com.google.ar.core.PointCloud;
 import com.google.ar.core.Session;
-import com.google.ar.core.exceptions.CameraException;
+import com.google.ar.core.Trackable;
 import com.google.ar.core.exceptions.NotTrackingException;
+
+import net.mariobodemann.piratear.DisplayRotationHelper;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -31,6 +35,7 @@ public class Scene implements GLSurfaceView.Renderer {
   private GLSurfaceView surfaceView;
   private Session session;
   private DrawingCallback callback;
+  private DisplayRotationHelper mDisplayRotationHelper;
 
   public Scene(Context context, GLSurfaceView surfaceView, Session session, DrawingCallback callback) {
     // Set up renderer.
@@ -41,6 +46,7 @@ public class Scene implements GLSurfaceView.Renderer {
     surfaceView.setRenderer(this);
     surfaceView.setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
     this.surfaceView = surfaceView;
+    this.mDisplayRotationHelper = new DisplayRotationHelper(context);
 
     this.session = session;
     this.callback = callback;
@@ -48,10 +54,12 @@ public class Scene implements GLSurfaceView.Renderer {
 
   public void bind() {
     surfaceView.onResume();
+    mDisplayRotationHelper.onResume();
   }
 
   public void unbind() {
     surfaceView.onPause();
+    mDisplayRotationHelper.onPause();
   }
 
   @Override
@@ -74,27 +82,16 @@ public class Scene implements GLSurfaceView.Renderer {
   @Override
   public void onSurfaceChanged(GL10 gl, int width, int height) {
     GLES20.glViewport(0, 0, width, height);
-    // Notify ARCore session that the view size changed so that the perspective matrix and
-    // the video background can be properly adjusted.
-    session.setDisplayGeometry(width, height);
+    mDisplayRotationHelper.onSurfaceChanged(width, height);
   }
 
   @Override
   public void onDrawFrame(GL10 gl) {
-    // Clear screen to notify driver it should not load any pixels from previous frame.
     GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
-    // Obtain the current frame from ARSession. When the configuration is set to
-    // UpdateMode.BLOCKING (it is by default), this will throttle the rendering to the
-    // camera framerate.
-    Frame frame = null;
-    try {
-      frame = session.update();
-    } catch (CameraException e) {
-      Log.e(TAG, "Could not update the session.", e);
-      return;
-    }
+    mDisplayRotationHelper.updateSessionIfNeeded(session);
 
+    final Frame frame = session.update();
     if (callback != null) {
       callback.onDraw(frame);
     }
@@ -103,28 +100,30 @@ public class Scene implements GLSurfaceView.Renderer {
     cameraFeedRenderer.draw(frame);
 
     // If not tracking, don't draw 3d objects.
-    if (frame.getTrackingState() == Frame.TrackingState.NOT_TRACKING) {
+    Camera camera = frame.getCamera();
+    if (camera.getTrackingState() != Trackable.TrackingState.TRACKING) {
       return;
     }
 
     // Get projection matrix.
     float[] projmtx = new float[16];
-    session.getProjectionMatrix(projmtx, 0, 0.1f, 100.0f);
+    camera.getProjectionMatrix(projmtx, 0, 0.1f, 100.0f);
 
     // Get camera matrix and draw.
     float[] viewmtx = new float[16];
-    frame.getViewMatrix(viewmtx, 0);
+    camera.getViewMatrix(viewmtx, 0);
 
     // Compute lighting from average intensity of the image.
     final float lightIntensity = frame.getLightEstimate().getPixelIntensity();
 
     // Visualize tracked points.
-    pointCloudRenderer.update(frame.getPointCloud());
-    pointCloudRenderer.draw(frame.getPointCloudPose(), viewmtx, projmtx);
+    PointCloud pointCloud = frame.acquirePointCloud();
+    pointCloudRenderer.update(pointCloud);
+    pointCloudRenderer.draw(viewmtx, projmtx);
 
     // Check if we detected at least one plane. If so, hide the loading message.
     if (callback != null) {
-      for (Plane plane : session.getAllPlanes()) {
+      for (Plane plane : session.getAllTrackables(Plane.class)) {
         if (plane.getType() == com.google.ar.core.Plane.Type.HORIZONTAL_UPWARD_FACING &&
             plane.getTrackingState() == Plane.TrackingState.TRACKING) {
           callback.trackingPlane();
@@ -134,7 +133,7 @@ public class Scene implements GLSurfaceView.Renderer {
     }
 
     // Visualize planes.
-    planeRenderer.drawPlanes(session.getAllPlanes(), frame.getPose(), projmtx);
+    planeRenderer.drawPlanes(session.getAllTrackables(Plane.class), camera.getPose(), projmtx);
 
     // Visualize anchors created by touch.
     float scaleFactor = 1.0f;
@@ -153,7 +152,7 @@ public class Scene implements GLSurfaceView.Renderer {
     return objectRenderer.size();
   }
 
-  public void addRenderer(ObjectRenderer renderer, Plane plane, Pose pose) {
+  public void addRenderer(ObjectRenderer renderer, Plane plane, Anchor anchor) {
     // Cap the number of objects created. This avoids overloading both the
     // rendering system and ARCore.
     if (objectRenderer.size() >= 16) {
@@ -168,7 +167,7 @@ public class Scene implements GLSurfaceView.Renderer {
       renderer.setAttachement(
           new PlaneAttachment(
               plane,
-              session.addAnchor(pose))
+              anchor)
       );
     } catch (NotTrackingException e) {
       Log.e(TAG, "Session is not tracking.");

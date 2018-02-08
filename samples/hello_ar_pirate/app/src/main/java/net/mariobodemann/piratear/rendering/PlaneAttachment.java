@@ -17,6 +17,9 @@ package net.mariobodemann.piratear.rendering;
 import com.google.ar.core.Anchor;
 import com.google.ar.core.Plane;
 import com.google.ar.core.Pose;
+import com.google.ar.core.Trackable;
+
+import static com.google.ar.core.Trackable.TrackingState.*;
 
 /**
  * This class tracks the attachment of object's Anchor to a Plane. It will construct a pose
@@ -38,8 +41,7 @@ public class PlaneAttachment {
 
   public boolean isTracking() {
     return /*true if*/
-        mPlane.getTrackingState() == Plane.TrackingState.TRACKING &&
-            mAnchor.getTrackingState() == Anchor.TrackingState.TRACKING;
+        mPlane.getTrackingState() == TRACKING && mAnchor.getTrackingState() == TRACKING;
   }
 
   public Pose getPose() {

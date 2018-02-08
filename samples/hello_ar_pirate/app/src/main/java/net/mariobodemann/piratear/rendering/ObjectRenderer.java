@@ -389,7 +389,7 @@ public class ObjectRenderer {
   }
 
   public void destroy(Session session) {
-    session.removeAnchors(singletonList(mAttachement.getAnchor()));
+    mAttachement.getAnchor().detach();
   }
 
   /**
