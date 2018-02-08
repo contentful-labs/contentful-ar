@@ -295,9 +295,9 @@ public class PlaneRenderer {
    * Draws the collection of tracked planes, with closer planes hiding more distant ones.
    *
    * @param allPlanes         The collection of planes to draw.
-   * @param cameraPose        The pose of the camera, as returned by {@link Frame#getPose()}
+   * @param cameraPose        The pose of the camera, as returned by {@link com.google.ar.core.Camera#getPose()}
    * @param cameraPerspective The projection matrix, as returned by
-   *                          {@link Session#getProjectionMatrix(float[], int, float, float)}
+   *                          {@link com.google.ar.core.Camera#getProjectionMatrix(float[], int, float, float)}
    */
   public void drawPlanes(Collection<Plane> allPlanes, Pose cameraPose,
                          float[] cameraPerspective) {
@@ -375,7 +375,7 @@ public class PlaneRenderer {
       plane.getCenterPose().toMatrix(planeMatrix, 0);
 
       updatePlaneParameters(planeMatrix, plane.getExtentX(),
-          plane.getExtentZ(), plane.getPlanePolygon());
+          plane.getExtentZ(), plane.getPolygon());
 
       // Get plane index. Keep a map to assign same indices to same planes.
       Integer planeIndex = mPlaneIndexMap.get(plane);
