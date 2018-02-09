@@ -22,13 +22,17 @@ Original Getting Started
 Slides acompaning this demo 🏴‍☠️
 =============================
 
-* ~WIP: [Talk in Japan   🇯🇵](https://bit.ly/pirate-ar-japan)~
+* [Talk in Japan   🇯🇵](https://bit.ly/pirate-ar-japan)
 * [Talk in Berlin  🐻](https://bit.ly/pirate-ar-berlin)
 * [Talk in Hamburg 🍔](https://bit.ly/pirate-ar-slides)
 
-Enjoy, and if you have any questions, please feel free to reach out to me [Mario](twitter.com/mario.bodemann).
+Enjoy, and if you have any questions, please feel free to reach out to [me](https://twitter.com/mariobodemann).
 
 Notes
 -----
 
-The original source comes from Google, see [here](https://github.com/google-ar/arcore-android-sdk). This work is not endorsed, affiliated, approved or in anyway related to Google. It just takes it's based on their demo code.
+* The original source comes from Google, see [here](https://github.com/google-ar/arcore-android-sdk). This work is not endorsed, affiliated, approved or in anyway related to Google. It just takes it's based on their demo code.
+
+* Thanks also goes to [Contentful](www.contentful.com). This company builds an content infrastructure and allowed its Java and Android SDK Developer [(me)](https://twitter.com/mariobodemann) to take time and learn a new skill. Thank you. 💖
+
+* Pull requests, feedback, github issues are welcome.
