@@ -325,5 +325,17 @@ public class HelloArActivity extends AppCompatActivity {
         nextObject = "";
       }
     });
+    findViewById(R.id.main_button_plus).setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        scene.setScaleFactor(scene.getScaleFactor() * 1.5f);
+      }
+    });
+    findViewById(R.id.main_button_minus).setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        scene.setScaleFactor(scene.getScaleFactor() / 1.5f);
+      }
+    });
   }
 }

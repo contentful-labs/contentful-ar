@@ -38,6 +38,7 @@ public class Scene implements GLSurfaceView.Renderer {
   private Session session;
   private DrawingCallback callback;
   private DisplayRotationHelper mDisplayRotationHelper;
+  private float scaleFactor = 1.0f;
 
   public Scene(Context context, GLSurfaceView surfaceView, DrawingCallback callback) {
     // Set up renderer.
@@ -150,7 +151,6 @@ public class Scene implements GLSurfaceView.Renderer {
     planeRenderer.drawPlanes(session.getAllTrackables(Plane.class), camera.getPose(), projmtx);
 
     // Visualize anchors created by touch.
-    float scaleFactor = 1.0f;
     for (final ObjectRenderer renderer : objectRenderer) {
       if (!renderer.isTracking()) {
         continue;
@@ -188,6 +188,14 @@ public class Scene implements GLSurfaceView.Renderer {
     }
 
     objectRenderer.add(renderer);
+  }
+
+  public float getScaleFactor() {
+    return scaleFactor;
+  }
+
+  public void setScaleFactor(float scaleFactor) {
+    this.scaleFactor = scaleFactor;
   }
 
   public interface DrawingCallback {
