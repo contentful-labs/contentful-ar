@@ -22,10 +22,9 @@ import android.opengl.GLSurfaceView;
 import android.opengl.GLUtils;
 import android.opengl.Matrix;
 
-import com.google.ar.core.Frame;
 import com.google.ar.core.Plane;
 import com.google.ar.core.Pose;
-import com.google.ar.core.Session;
+import com.google.ar.core.TrackingState;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -310,7 +309,7 @@ public class PlaneRenderer {
     float cameraZ = cameraPose.tz();
     for (Plane plane : allPlanes) {
       if (plane.getType() != com.google.ar.core.Plane.Type.HORIZONTAL_UPWARD_FACING ||
-          plane.getTrackingState() != Plane.TrackingState.TRACKING) {
+          plane.getTrackingState() != TrackingState.TRACKING) {
         continue;
       }
 

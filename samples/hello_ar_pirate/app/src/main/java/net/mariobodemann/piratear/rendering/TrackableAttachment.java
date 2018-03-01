@@ -15,40 +15,39 @@
 package net.mariobodemann.piratear.rendering;
 
 import com.google.ar.core.Anchor;
-import com.google.ar.core.Plane;
 import com.google.ar.core.Pose;
 import com.google.ar.core.Trackable;
 
-import static com.google.ar.core.Trackable.TrackingState.*;
+import static com.google.ar.core.TrackingState.TRACKING;
 
 /**
  * This class tracks the attachment of object's Anchor to a Plane. It will construct a pose
  * that will stay on the plane (in Y direction), while still properly tracking the XZ changes
  * from the anchor updates.
  */
-public class PlaneAttachment {
-  private final Plane mPlane;
+public class TrackableAttachment {
+  private final Trackable mTrackable;
   private final Anchor mAnchor;
 
   // Allocate temporary storage to avoid multiple allocations per frame.
   private final float[] mPoseTranslation = new float[3];
   private final float[] mPoseRotation = new float[4];
 
-  public PlaneAttachment(Plane plane, Anchor anchor) {
-    mPlane = plane;
+  public TrackableAttachment(Trackable trackable, Anchor anchor) {
+    mTrackable = trackable;
     mAnchor = anchor;
   }
 
   public boolean isTracking() {
     return /*true if*/
-        mPlane.getTrackingState() == TRACKING && mAnchor.getTrackingState() == TRACKING;
+        mTrackable.getTrackingState() == TRACKING && mAnchor.getTrackingState() == TRACKING;
   }
 
   public Pose getPose() {
     Pose pose = mAnchor.getPose();
     pose.getTranslation(mPoseTranslation, 0);
     pose.getRotationQuaternion(mPoseRotation, 0);
-    mPoseTranslation[1] = mPlane.getCenterPose().ty();
+    mPoseTranslation[1] = mTrackable.getAnchors().iterator().next().getPose().ty();
     return new Pose(mPoseTranslation, mPoseRotation);
   }
 

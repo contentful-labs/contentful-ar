@@ -27,14 +27,16 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import com.google.ar.core.ArCoreApk;
 import com.google.ar.core.Camera;
 import com.google.ar.core.Config;
 import com.google.ar.core.Frame;
 import com.google.ar.core.HitResult;
 import com.google.ar.core.Plane;
+import com.google.ar.core.Point;
 import com.google.ar.core.Session;
 import com.google.ar.core.Trackable;
-import com.google.ar.core.Trackable.TrackingState;
+import com.google.ar.core.TrackingState;
 
 import net.mariobodemann.piratear.rendering.ObjectRenderer;
 import net.mariobodemann.piratear.rendering.ObjectRendererFactory;
@@ -69,6 +71,9 @@ public class HelloArActivity extends AppCompatActivity {
   private ArrayBlockingQueue<MotionEvent> queuedTaps = new ArrayBlockingQueue<>(16);
   private String nextObject = "parrot.obj";
 
+  private ObjectRendererFactory objectFactory;
+  private boolean installRequested = false;
+
   private final View.OnTouchListener tapListener = new View.OnTouchListener() {
     @Override
     public boolean onTouch(View v, MotionEvent event) {
@@ -92,8 +97,6 @@ public class HelloArActivity extends AppCompatActivity {
     }
   };
 
-  private ObjectRendererFactory objectFactory;
-
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -103,16 +106,7 @@ public class HelloArActivity extends AppCompatActivity {
     setupButtons();
 
     objectFactory = new ObjectRendererFactory(getExternalFilesDir(null).getAbsolutePath());
-    session = new Session(this);
-    scene = new Scene(this, mSurfaceView, session, drawCallback);
-
-    // Create default config, check is supported, create session from that config.
-    defaultConfig = new Config(session);
-    if (!session.isSupported(defaultConfig)) {
-      Toast.makeText(this, "This device does not support AR", Toast.LENGTH_LONG).show();
-      finish();
-      return;
-    }
+    scene = new Scene(this, mSurfaceView, drawCallback);
 
     // Set up tap listener.
     mSurfaceView.setOnTouchListener(tapListener);
@@ -124,13 +118,31 @@ public class HelloArActivity extends AppCompatActivity {
   protected void onResume() {
     super.onResume();
 
+    // Check if AR Core is installed
+    switch (ArCoreApk.getInstance().requestInstall(this, !installRequested)) {
+      case INSTALL_REQUESTED:
+        installRequested = true;
+        return;
+      case INSTALLED:
+        break;
+    }
+
     // ARCore requires camera permissions to operate. If we did not yet obtain runtime
     // permission on Android M and above, now is a good time to ask the user for it.
     if (CameraPermissionHelper.hasCameraPermission(this)) {
       showLoadingMessage();
       // Note that order matters - see the note in onPause(), the reverse applies here.
+      session = new Session(this);
+      // Create default config, check is supported, create session from that config.
+      defaultConfig = new Config(session);
+      if (!session.isSupported(defaultConfig)) {
+        Toast.makeText(this, "This device does not support AR", Toast.LENGTH_LONG).show();
+        finish();
+        return;
+      }
+
       session.resume();
-      scene.bind();
+      scene.bind(session);
     } else {
       CameraPermissionHelper.requestCameraPermission(this);
     }
@@ -143,7 +155,9 @@ public class HelloArActivity extends AppCompatActivity {
     // to query the session. If Session is paused before GLSurfaceView, GLSurfaceView may
     // still call session.update() and create a SessionPausedException.
     scene.unbind();
-    session.pause();
+    if (session != null) {
+      session.pause();
+    }
   }
 
   @Override
@@ -182,15 +196,17 @@ public class HelloArActivity extends AppCompatActivity {
       for (HitResult hit : frame.hitTest(tap)) {
         // Check if any plane was hit, and if it was hit inside the plane polygon.
         Trackable trackable = hit.getTrackable();
-        if (trackable instanceof Plane
-            && ((Plane) trackable).isPoseInPolygon(hit.getHitPose())) {
+        if ((trackable instanceof Plane && ((Plane) trackable).isPoseInPolygon(hit.getHitPose()))
+            || (trackable instanceof Point
+            && ((Point) trackable).getOrientationMode()
+            == Point.OrientationMode.ESTIMATED_SURFACE_NORMAL)) {
 
           final ObjectRenderer shadow = objectFactory.create("andy_shadow.obj");
           if (shadow != null) {
             shadow.setBlendMode(ObjectRenderer.BlendMode.Shadow);
             scene.addRenderer(
                 shadow,
-                (Plane)trackable,
+                trackable,
                 hit.createAnchor()
             );
           }
@@ -205,7 +221,7 @@ public class HelloArActivity extends AppCompatActivity {
           if (object != null) {
             scene.addRenderer(
                 object,
-                (Plane)trackable,
+                trackable,
                 hit.createAnchor()
             );
           }

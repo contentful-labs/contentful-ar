@@ -36,8 +36,6 @@ import de.javagl.obj.ObjData;
 import de.javagl.obj.ObjReader;
 import de.javagl.obj.ObjUtils;
 
-import static java.util.Collections.singletonList;
-
 /**
  * Renders an object loaded from an OBJ file in OpenGL.
  */
@@ -82,7 +80,7 @@ public class ObjectRenderer {
   private float mSpecularPower = 6.0f;
   // cache model view matrix
   private final float[] modelMatrix = new float[16];
-  private PlaneAttachment mAttachement;
+  private TrackableAttachment mAttachement;
   private boolean mInitialized = false;
 
   private final String mObjectFileName;
@@ -380,7 +378,7 @@ public class ObjectRenderer {
     return mAttachement.isTracking();
   }
 
-  public void setAttachement(PlaneAttachment attachement) {
+  public void setAttachement(TrackableAttachment attachement) {
     this.mAttachement = attachement;
   }
 

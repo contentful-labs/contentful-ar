@@ -10,9 +10,11 @@ import com.google.ar.core.Anchor;
 import com.google.ar.core.Camera;
 import com.google.ar.core.Frame;
 import com.google.ar.core.Plane;
+import com.google.ar.core.Point;
 import com.google.ar.core.PointCloud;
 import com.google.ar.core.Session;
 import com.google.ar.core.Trackable;
+import com.google.ar.core.TrackingState;
 import com.google.ar.core.exceptions.NotTrackingException;
 
 import net.mariobodemann.piratear.DisplayRotationHelper;
@@ -37,7 +39,7 @@ public class Scene implements GLSurfaceView.Renderer {
   private DrawingCallback callback;
   private DisplayRotationHelper mDisplayRotationHelper;
 
-  public Scene(Context context, GLSurfaceView surfaceView, Session session, DrawingCallback callback) {
+  public Scene(Context context, GLSurfaceView surfaceView, DrawingCallback callback) {
     // Set up renderer.
     this.context = context;
     surfaceView.setPreserveEGLContextOnPause(true);
@@ -48,11 +50,11 @@ public class Scene implements GLSurfaceView.Renderer {
     this.surfaceView = surfaceView;
     this.mDisplayRotationHelper = new DisplayRotationHelper(context);
 
-    this.session = session;
     this.callback = callback;
   }
 
-  public void bind() {
+  public void bind(Session session) {
+    this.session = session;
     surfaceView.onResume();
     mDisplayRotationHelper.onResume();
   }
@@ -68,7 +70,6 @@ public class Scene implements GLSurfaceView.Renderer {
 
     // Create the texture and pass it to ARCore session to be filled during update().
     cameraFeedRenderer.createOnGlThread(context);
-    session.setCameraTextureName(cameraFeedRenderer.getTextureId());
 
     // Prepare the other rendering objects.
     try {
@@ -87,9 +88,14 @@ public class Scene implements GLSurfaceView.Renderer {
 
   @Override
   public void onDrawFrame(GL10 gl) {
+    if (session == null) {
+      return;
+    }
+
     GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
     mDisplayRotationHelper.updateSessionIfNeeded(session);
+    session.setCameraTextureName(cameraFeedRenderer.getTextureId());
 
     final Frame frame = session.update();
     if (callback != null) {
@@ -101,7 +107,7 @@ public class Scene implements GLSurfaceView.Renderer {
 
     // If not tracking, don't draw 3d objects.
     Camera camera = frame.getCamera();
-    if (camera.getTrackingState() != Trackable.TrackingState.TRACKING) {
+    if (camera.getTrackingState() != TrackingState.TRACKING) {
       return;
     }
 
@@ -120,12 +126,20 @@ public class Scene implements GLSurfaceView.Renderer {
     PointCloud pointCloud = frame.acquirePointCloud();
     pointCloudRenderer.update(pointCloud);
     pointCloudRenderer.draw(viewmtx, projmtx);
+    pointCloud.release();
 
     // Check if we detected at least one plane. If so, hide the loading message.
     if (callback != null) {
       for (Plane plane : session.getAllTrackables(Plane.class)) {
         if (plane.getType() == com.google.ar.core.Plane.Type.HORIZONTAL_UPWARD_FACING &&
-            plane.getTrackingState() == Plane.TrackingState.TRACKING) {
+            plane.getTrackingState() == TrackingState.TRACKING) {
+          callback.trackingPlane();
+          break;
+        }
+      }
+      for (Point point : session.getAllTrackables(Point.class)) {
+        if (point.getOrientationMode() == Point.OrientationMode.ESTIMATED_SURFACE_NORMAL &&
+            point.getTrackingState() == TrackingState.TRACKING) {
           callback.trackingPlane();
           break;
         }
@@ -152,7 +166,7 @@ public class Scene implements GLSurfaceView.Renderer {
     return objectRenderer.size();
   }
 
-  public void addRenderer(ObjectRenderer renderer, Plane plane, Anchor anchor) {
+  public void addRenderer(ObjectRenderer renderer, Trackable trackable, Anchor anchor) {
     // Cap the number of objects created. This avoids overloading both the
     // rendering system and ARCore.
     if (objectRenderer.size() >= 16) {
@@ -165,8 +179,8 @@ public class Scene implements GLSurfaceView.Renderer {
     // in the correct position relative both to the world and to the plane.
     try {
       renderer.setAttachement(
-          new PlaneAttachment(
-              plane,
+          new TrackableAttachment(
+              trackable,
               anchor)
       );
     } catch (NotTrackingException e) {

@@ -29,12 +29,12 @@ public class XmlLayoutRenderer extends ObjectRenderer {
     setBlendMode(BlendMode.Grid);
   }
 
-  @Override protected Bitmap readTexture() throws FileNotFoundException {
-    return bitmap;
-  }
-
   private static String basepath(Context context) {
     return context.getExternalFilesDir(null).getAbsolutePath();
+  }
+
+  @Override protected Bitmap readTexture() throws FileNotFoundException {
+    return bitmap;
   }
 
   private void loadTexture(Context context, @LayoutRes int layout) {
