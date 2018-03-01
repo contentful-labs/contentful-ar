@@ -5,14 +5,6 @@ Welcome to my addition to the Google AR SDK Demo. This demo uses the Google demo
 
 Please note, we do not accept pull requests.
 
-## Additional Notes
-
-You must disclose the use of ARCore, and how it collects and processes data.
-This can be done by displaying a prominent link to the site
-"How Google uses data when you use our partners' sites or apps",
-(located at www.google.com/policies/privacy/partners/, or any other URL Google
-may provide from time to time).
-=======
 Original Getting Started
 ========================
 
@@ -36,3 +28,9 @@ Notes
 * Thanks also goes to [Contentful](www.contentful.com). This company builds an content infrastructure and allowed its Java and Android SDK Developer [(me)](https://twitter.com/mariobodemann) to take time and learn a new skill. Thank you. 💖
 
 * Pull requests, feedback, github issues are welcome.
+
+You must disclose the use of ARCore, and how it collects and processes data.
+This can be done by displaying a prominent link to the site
+"How Google uses data when you use our partners' sites or apps",
+(located at www.google.com/policies/privacy/partners/, or any other URL Google
+may provide from time to time).
