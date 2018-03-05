@@ -20,37 +20,28 @@
     >
 
     <Button
-        android:id="@+id/main_button_bird"
+        android:id="@+id/main_button_offline"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:checked="true"
-        android:text="🐦"
+        android:text="📵"
         />
 
     <Button
-        android:id="@+id/main_button_conner"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:text="C"
-        />
-
-    <Button
-        android:id="@+id/main_button_android"
+        android:id="@+id/main_button_contentful"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:text="📱"
+        android:text="🚀"
         />
 
-    <Button
-        android:id="@+id/main_button_speech"
+    <TextView
+        android:id="@+id/selected_object"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/main_button_conner"
-        android:layout_centerHorizontal="true"
-        android:text="💬"
+        android:layout_toEndOf="@id/main_button_offline"
+        android:layout_toStartOf="@id/main_button_contentful"
         />
 
     <Button
@@ -58,7 +49,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_toStartOf="@id/main_button_speech"
+        android:layout_alignParentStart="true"
         android:text="++"
         />
 
@@ -67,9 +58,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_toEndOf="@id/main_button_speech"
+        android:layout_alignParentEnd="true"
         android:text="--"
         />
+
 
     <android.opengl.GLSurfaceView
         android:id="@+id/surfaceview"

@@ -16,17 +16,26 @@
 
 package com.contentful.ar;
 
-import android.content.res.AssetManager;
+import android.content.DialogInterface;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.contentful.ar.io.AssetsSaver;
+import com.contentful.ar.rendering.ObjectRenderer;
+import com.contentful.ar.rendering.ObjectRendererFactory;
+import com.contentful.ar.rendering.Scene;
+import com.contentful.ar.rendering.XmlLayoutRenderer;
+import com.contentful.ar.vault.VaultManager;
+import com.contentful.ar.vault.models.Model;
 import com.google.ar.core.ArCoreApk;
 import com.google.ar.core.Camera;
 import com.google.ar.core.Config;
@@ -38,19 +47,12 @@ import com.google.ar.core.Session;
 import com.google.ar.core.Trackable;
 import com.google.ar.core.TrackingState;
 
-import com.contentful.ar.rendering.ObjectRenderer;
-import com.contentful.ar.rendering.ObjectRendererFactory;
-import com.contentful.ar.rendering.Scene;
-import com.contentful.ar.rendering.XmlLayoutRenderer;
-
-import org.apache.commons.io.IOUtils;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.function.Predicate;
 
 /**
  * This is a simple example that shows how to create an augmented reality (AR) application using
@@ -59,12 +61,14 @@ import java.util.concurrent.ArrayBlockingQueue;
  */
 public class HelloArActivity extends AppCompatActivity {
   private static final String TAG = HelloArActivity.class.getSimpleName();
+  public static final String XML_UI_MODEL_NAME = "XML UI";
 
   // Rendering. The Renderers are created here, and initialized when the GL surface is created.
   private GLSurfaceView mSurfaceView;
   private Scene scene;
   private Config defaultConfig;
   private Session session;
+  private VaultManager vaultManager;
   private Snackbar loadingMessageSnackbar = null;
 
   // Tap handling and UI.
@@ -73,6 +77,8 @@ public class HelloArActivity extends AppCompatActivity {
 
   private ObjectRendererFactory objectFactory;
   private boolean installRequested = false;
+
+  private List<String> models = new ArrayList<>();
 
   private final View.OnTouchListener tapListener = new View.OnTouchListener() {
     @Override
@@ -97,6 +103,63 @@ public class HelloArActivity extends AppCompatActivity {
     }
   };
 
+  private View.OnClickListener offlineButtonClicked = new View.OnClickListener() {
+    @Override
+    public void onClick(View view) {
+      final List<String> assets = new ArrayList<>();
+
+      try {
+        assets.addAll(Arrays.asList(getAssets().list("")));
+      } catch (IOException e) {
+        Log.e(TAG, "Could not list assets.", e);
+        return;
+      }
+      assets.removeIf(new Predicate<String>() {
+        @Override public boolean test(String s) {
+          return !s.contains(".obj");
+        }
+      });
+      assets.add(XML_UI_MODEL_NAME);
+
+      final String items[] = new String[assets.size()];
+      for (int i = 0; i < items.length; ++i) {
+        items[i] = assets.get(i);
+      }
+
+      new AlertDialog.Builder(HelloArActivity.this)
+          .setTitle("Select build-in models")
+          .setItems(items, new DialogInterface.OnClickListener() {
+            @Override public void onClick(DialogInterface dialog, int which) {
+              String selection = assets.get(which);
+              ((TextView) findViewById(R.id.selected_object)).setText(selection);
+              if (XML_UI_MODEL_NAME.equals(selection)) {
+                selection = "";
+              }
+              nextObject = selection;
+            }
+          }).show();
+    }
+  };
+
+  private View.OnClickListener contentfulButtonClicked = new View.OnClickListener() {
+    @Override
+    public void onClick(View view) {
+      final String items[] = new String[models.size()];
+      for (int i = 0; i < items.length; ++i) {
+        items[i] = models.get(i) + ".obj";
+      }
+
+      new AlertDialog.Builder(HelloArActivity.this)
+          .setTitle("Select contentful models")
+          .setItems(items, new DialogInterface.OnClickListener() {
+            @Override public void onClick(DialogInterface dialog, int which) {
+              nextObject = models.get(which) + ".obj";
+              ((TextView) findViewById(R.id.selected_object)).setText(nextObject);
+            }
+          }).show();
+    }
+  };
+
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -111,7 +174,9 @@ public class HelloArActivity extends AppCompatActivity {
     // Set up tap listener.
     mSurfaceView.setOnTouchListener(tapListener);
 
-    copyAssetsToSdCard();
+    vaultManager = new VaultManager();
+
+    AssetsSaver.copyApkAssetsToSdcard(this);
   }
 
   @Override
@@ -146,6 +211,23 @@ public class HelloArActivity extends AppCompatActivity {
     } else {
       CameraPermissionHelper.requestCameraPermission(this);
     }
+
+    vaultManager.bind(this, new VaultManager.Listener() {
+      @Override public void onModelReceived(Model model) {
+        info(model.title());
+        if (!models.contains(model.title())) {
+          models.add(model.title());
+        }
+      }
+
+      @Override public void error(String message) {
+        Log.e(TAG, message);
+      }
+
+      @Override public void info(String message) {
+        Log.i(TAG, message);
+      }
+    });
   }
 
   @Override
@@ -157,6 +239,10 @@ public class HelloArActivity extends AppCompatActivity {
     scene.unbind();
     if (session != null) {
       session.pause();
+    }
+
+    if (vaultManager != null) {
+      vaultManager.unbind();
     }
   }
 
@@ -258,73 +344,10 @@ public class HelloArActivity extends AppCompatActivity {
     });
   }
 
-  private void copyAssetsToSdCard() {
-    final AssetManager assets = getAssets();
-    final String[] assetArray;
-    try {
-      assetArray = assets.list("");
-    } catch (IOException e) {
-      Log.e(TAG, "Could not list assets.", e);
-      return;
-    }
-
-    final File outputDir = getExternalFilesDir(null);
-    if (outputDir == null) {
-      Log.e(TAG, "Could not find default external directory");
-      return;
-    }
-
-    for (final String file : assetArray) {
-      final String localCopyName = outputDir.getAbsolutePath() + "/" + file;
-
-      // ignore files without an extension (mostly folders)
-      if (!localCopyName.contains("")) {
-        continue;
-      }
-
-      OutputStream outputStream;
-      try {
-        outputStream = new FileOutputStream(localCopyName);
-      } catch (FileNotFoundException e) {
-        Log.e(TAG, "Could not open copy file: '" + localCopyName + "'.");
-        outputStream = null;
-      }
-
-      if (outputStream != null) {
-        try {
-          IOUtils.copy(assets.open(file), outputStream);
-        } catch (IOException e) {
-          Log.i(TAG, "Could not open asset file: '" + file + "'.");
-        }
-      }
-    }
-  }
 
   private void setupButtons() {
-    findViewById(R.id.main_button_bird).setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        nextObject = "parrot.obj";
-      }
-    });
-    findViewById(R.id.main_button_conner).setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        nextObject = "conner.obj";
-      }
-    });
-    findViewById(R.id.main_button_android).setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        nextObject = "andy.obj";
-      }
-    });
-    findViewById(R.id.main_button_speech).setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        nextObject = "";
-      }
-    });
+    findViewById(R.id.main_button_offline).setOnClickListener(offlineButtonClicked);
+    findViewById(R.id.main_button_contentful).setOnClickListener(contentfulButtonClicked);
     findViewById(R.id.main_button_plus).setOnClickListener(new View.OnClickListener() {
       @Override
       public void onClick(View view) {

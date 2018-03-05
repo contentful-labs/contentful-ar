@@ -25,7 +25,13 @@ android {
 dependencies {
     implementation 'com.google.ar:core:1.0.0'
     implementation 'de.javagl:obj:0.2.1'
-    implementation 'com.android.support:appcompat-v7:27.0.2'
-    implementation 'com.android.support:design:27.0.2'
+    implementation 'com.android.support:appcompat-v7:27.1.0'
+    implementation 'com.android.support:design:27.1.0'
     implementation 'org.apache.directory.studio:org.apache.commons.io:2.4'
+
+    annotationProcessor 'com.contentful.vault:compiler:3.1.1'
+    annotationProcessor 'com.contentful.vault:core:3.1.1'
+    implementation 'com.contentful.vault:core:3.1.1'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.2'
+    implementation 'io.reactivex.rxjava2:rxjava:2.1.9'
 }
