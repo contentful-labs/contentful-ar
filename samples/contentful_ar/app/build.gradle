@@ -4,7 +4,7 @@ android {
     compileSdkVersion 27
 
     defaultConfig {
-        applicationId "com.contentful.ar"
+        applicationId "com.contentful.eggar"
         minSdkVersion 24
         targetSdkVersion 27
         versionCode 2

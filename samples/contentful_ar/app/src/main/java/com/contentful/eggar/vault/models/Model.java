@@ -1,4 +1,4 @@
-package com.contentful.ar.vault.models;
+package com.contentful.eggar.vault.models;
 
 import com.contentful.vault.Asset;
 import com.contentful.vault.ContentType;

@@ -1,12 +1,12 @@
-package com.contentful.ar.vault;
+package com.contentful.eggar.vault;
 
 
 import android.content.Context;
 import android.util.Log;
 
-import com.contentful.ar.io.AssetsSaver;
-import com.contentful.ar.vault.models.Model;
-import com.contentful.ar.vault.models.VaultSpace;
+import com.contentful.eggar.io.AssetsSaver;
+import com.contentful.eggar.vault.models.Model;
+import com.contentful.eggar.vault.models.VaultSpace;
 import com.contentful.vault.SyncCallback;
 import com.contentful.vault.SyncConfig;
 import com.contentful.vault.SyncResult;

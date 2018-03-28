@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.contentful.ar;
+package com.contentful.eggar;
 
 import android.content.DialogInterface;
 import android.opengl.GLSurfaceView;
@@ -26,16 +26,15 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.contentful.ar.io.AssetsSaver;
-import com.contentful.ar.rendering.ObjectRenderer;
-import com.contentful.ar.rendering.ObjectRendererFactory;
-import com.contentful.ar.rendering.Scene;
-import com.contentful.ar.rendering.XmlLayoutRenderer;
-import com.contentful.ar.vault.VaultManager;
-import com.contentful.ar.vault.models.Model;
+import com.contentful.eggar.io.AssetsSaver;
+import com.contentful.eggar.rendering.ObjectRenderer;
+import com.contentful.eggar.rendering.ObjectRendererFactory;
+import com.contentful.eggar.rendering.Scene;
+import com.contentful.eggar.rendering.XmlLayoutRenderer;
+import com.contentful.eggar.vault.VaultManager;
+import com.contentful.eggar.vault.models.Model;
 import com.google.ar.core.ArCoreApk;
 import com.google.ar.core.Camera;
 import com.google.ar.core.Config;
@@ -131,7 +130,6 @@ public class HelloArActivity extends AppCompatActivity {
           .setItems(items, new DialogInterface.OnClickListener() {
             @Override public void onClick(DialogInterface dialog, int which) {
               String selection = assets.get(which);
-              ((TextView) findViewById(R.id.selected_object)).setText(selection);
               if (XML_UI_MODEL_NAME.equals(selection)) {
                 selection = "";
               }
@@ -154,7 +152,6 @@ public class HelloArActivity extends AppCompatActivity {
           .setItems(items, new DialogInterface.OnClickListener() {
             @Override public void onClick(DialogInterface dialog, int which) {
               nextObject = models.get(which) + ".obj";
-              ((TextView) findViewById(R.id.selected_object)).setText(nextObject);
             }
           }).show();
     }

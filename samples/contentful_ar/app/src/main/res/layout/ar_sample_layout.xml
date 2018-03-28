@@ -6,77 +6,41 @@
               android:orientation="vertical"
     >
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:padding="8dp"
-        android:text="sample layout"
-        android:textAllCaps="true"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
-        android:textStyle="bold"
-        />
-
     <View
         android:layout_width="match_parent"
-        android:layout_height="2px"
-        android:layout_marginEnd="16dp"
-        android:layout_marginStart="16dp"
-        android:background="#80000000"
-        android:padding="32dp"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         />
 
-    <ImageView
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_gravity="center"
-        android:src="@mipmap/ic_launcher"
-        />
-
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="32dp"
-        >
+        android:layout_height="wrap_content">
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="button"
+        <ImageView
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center"
+            android:src="@mipmap/ic_launcher"
             />
 
-        <Button
-            android:layout_width="wrap_content"
+        <ImageView
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="button"
-            />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="button"
-            />
-
-        <CheckBox
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="checkbox"
+            android:layout_gravity="center"
+            android:paddingTop="250dp"
+            android:src="@drawable/banner"
             />
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="😱😱😱😱"
+            android:paddingTop="210dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="top"
+            android:gravity="center"
+            android:text="Happy Easter"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="48sp"
             />
-    </LinearLayout>
-
-    <RatingBar
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_margin="32dp"
-        android:numStars="5"
-        android:rating="2"
-        />
+    </FrameLayout>
 
 </LinearLayout>

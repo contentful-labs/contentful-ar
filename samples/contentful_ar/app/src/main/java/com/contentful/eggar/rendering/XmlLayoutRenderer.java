@@ -1,4 +1,4 @@
-package com.contentful.ar.rendering;
+package com.contentful.eggar.rendering;
 
 
 import android.content.Context;
@@ -12,7 +12,7 @@ import android.view.View;
 
 import java.io.FileNotFoundException;
 
-import static com.contentful.ar.rendering.ShaderUtil.normalizeFileName;
+import static com.contentful.eggar.rendering.ShaderUtil.normalizeFileName;
 
 public class XmlLayoutRenderer extends ObjectRenderer {
   private Bitmap bitmap;

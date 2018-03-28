@@ -1,4 +1,4 @@
-package com.contentful.ar.rendering;
+package com.contentful.eggar.rendering;
 
 
 import android.content.Context;
@@ -17,7 +17,7 @@ import com.google.ar.core.Trackable;
 import com.google.ar.core.TrackingState;
 import com.google.ar.core.exceptions.NotTrackingException;
 
-import com.contentful.ar.DisplayRotationHelper;
+import com.contentful.eggar.DisplayRotationHelper;
 
 import java.io.IOException;
 import java.util.ArrayList;

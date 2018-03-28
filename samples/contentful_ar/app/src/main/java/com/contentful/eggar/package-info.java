@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 /**
- * This package contains classes that do the rendering for this example.
+ * A sample showing how to build an Augmented Reality app using ARCore.
  */
-package com.contentful.ar.rendering;
+package com.contentful.eggar;

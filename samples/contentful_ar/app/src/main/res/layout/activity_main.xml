@@ -33,15 +33,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
-        android:text="🚀"
-        />
-
-    <TextView
-        android:id="@+id/selected_object"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toEndOf="@id/main_button_offline"
-        android:layout_toStartOf="@id/main_button_contentful"
+        android:text="🐰🥚"
         />
 
     <Button
@@ -69,6 +61,6 @@
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="com.contentful.ar.HelloArActivity"
+        tools:context="com.contentful.eggar.HelloArActivity"
         />
 </RelativeLayout>

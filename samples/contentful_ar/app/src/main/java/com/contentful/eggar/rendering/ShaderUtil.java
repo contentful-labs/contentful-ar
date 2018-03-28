@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.contentful.ar.rendering;
+package com.contentful.eggar.rendering;
 
 import android.opengl.GLES20;
 import android.util.Log;

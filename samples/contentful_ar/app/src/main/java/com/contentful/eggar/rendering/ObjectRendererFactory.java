@@ -1,9 +1,9 @@
-package com.contentful.ar.rendering;
+package com.contentful.eggar.rendering;
 
 
 import java.io.File;
 
-import static com.contentful.ar.rendering.ShaderUtil.normalizeFileName;
+import static com.contentful.eggar.rendering.ShaderUtil.normalizeFileName;
 
 public class ObjectRendererFactory {
   private static final String TAG = ObjectRendererFactory.class.getSimpleName();

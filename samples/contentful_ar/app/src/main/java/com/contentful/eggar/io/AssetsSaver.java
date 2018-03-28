@@ -1,11 +1,11 @@
-package com.contentful.ar.io;
+package com.contentful.eggar.io;
 
 
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.util.Log;
 
-import com.contentful.ar.vault.models.Model;
+import com.contentful.eggar.vault.models.Model;
 import com.contentful.vault.Asset;
 
 import org.apache.commons.io.IOUtils;
